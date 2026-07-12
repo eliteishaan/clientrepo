@@ -8,14 +8,14 @@ const PDFPreviewRenderer = forwardRef<RendererEngine, { asset: AdaptedAsset, vie
     const { setRendererState } = useViewerStore();
 
     useImperativeHandle(ref, () => ({
-      load: async (_url: string) => {
+      load: async () => {
         setRendererState(viewerId, 'Ready');
       },
       dispose: () => {},
       pause: () => {},
       resume: () => {},
-      setMode: (_mode) => {},
-      focusAnnotation: (_id) => {},
+      setMode: () => {},
+      focusAnnotation: () => {},
       capture: () => '',
       resetView: () => {}
     }));

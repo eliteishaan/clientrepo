@@ -8,9 +8,6 @@ import {
   awardsQuery, 
   publicationsQuery 
 } from '@/sanity/queries';
-import { Container } from '@/components/ui/Container';
-import { Section } from '@/components/ui/Section';
-import { Divider } from '@/components/ui/Divider';
 
 import { HeroSection } from '@/components/features/home/sections/HeroSection';
 import { PhilosophySection } from '@/components/features/home/sections/PhilosophySection';
@@ -21,6 +18,11 @@ import { EducationSection } from '@/components/features/home/sections/EducationS
 import { AwardsSection } from '@/components/features/home/sections/AwardsSection';
 import { PublicationsSection } from '@/components/features/home/sections/PublicationsSection';
 import { ContactSection } from '@/components/features/home/sections/ContactSection';
+
+export const metadata = {
+  title: 'Vivaan — Precision Engineering & Industrial Design',
+  description: 'Portfolio of Vivaan — mechatronics engineer and industrial designer crafting precision systems and compelling products.',
+};
 
 export default async function HomePage() {
   const fetchOptions = { next: { tags: [SANITY_TAGS.page, SANITY_TAGS.project, SANITY_TAGS.settings] } };
@@ -43,33 +45,45 @@ export default async function HomePage() {
     client.fetch(publicationsQuery, {}, fetchOptions),
   ]);
 
-  if (!author && !featuredProjects?.length) {
-    return (
-      <Container>
-        <Section spacing="xl">
-          <p>No homepage data available. Please publish content in Sanity.</p>
-        </Section>
-      </Container>
-    );
-  }
-
   return (
-    <div className="flex flex-col w-full">
+    <main id="main-content" className="flex flex-col w-full bg-background">
+      {/* Skip to content for keyboard/screen reader users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-foreground focus:text-background focus:font-mono focus:text-sm focus:uppercase focus:tracking-widest focus:rounded"
+      >
+        Skip to content
+      </a>
+
+      {/* 01 — Hero: Cinematic opening / WebGL presence */}
       <HeroSection 
-        heroSequence={settings?.homepageHero} 
         title={author?.name} 
         subtitle={author?.role} 
       />
-      <Divider />
+
+      {/* 02 — Philosophy: Manifesto / Brand voice */}
       <PhilosophySection bio={author?.bio} />
+
+      {/* 03 — Selected Works: Editorial stacked projects */}
       <FeaturedProjectsSection projects={featuredProjects} />
+
+      {/* 04 — Capabilities: Typographic marquee skills */}
       <SkillsSection skills={author?.skills} />
+
+      {/* 05 — Experience: Blueprint engineering timeline */}
       <ExperienceSection experience={experience} />
+
+      {/* 06 — Education: Architectural grow-line layout */}
       <EducationSection education={education} />
+
+      {/* 07 — Recognition: Count-up awards list */}
       <AwardsSection awards={awards} />
+
+      {/* 08 — Publications: Print-editorial research list */}
       <PublicationsSection publications={publications} />
-      <Divider />
+
+      {/* 09 — Contact & Footer: Full-chapter closing CTA */}
       <ContactSection settings={settings} />
-    </div>
+    </main>
   );
 }

@@ -13,6 +13,7 @@
   --color-text-metric: var(--theme-text-metric);
   --color-accent: var(--theme-accent);
   --color-accent-foreground: var(--theme-accent-foreground);
+  --color-ring: var(--theme-accent);
   --color-success: var(--theme-success);
   --color-warning: var(--theme-warning);
   --color-error: var(--theme-error);
@@ -35,12 +36,13 @@
   --spacing-component-sm: 0.5rem;
   --spacing-component-md: 1rem;
   --spacing-component-lg: 1.5rem;
-  --spacing-section-sm: 2rem;
-  --spacing-section-md: 4rem;
-  --spacing-section-lg: 8rem;
-  --spacing-rhythm-sm: 1rem;
-  --spacing-rhythm-md: 2rem;
-  --spacing-rhythm-lg: 4rem;
+  --spacing-section-sm: 4rem;
+  --spacing-section-md: 8rem;
+  --spacing-section-lg: 12rem;
+  --spacing-section-xl: 16rem;
+  --spacing-rhythm-sm: 1.5rem;
+  --spacing-rhythm-md: 3rem;
+  --spacing-rhythm-lg: 6rem;
 
   /* Radius (creates rounded-* classes) */
   --radius-sm: var(--theme-radius-sm);
@@ -72,32 +74,32 @@
 
 @layer base {
   :root {
-    /* Baseline Light Mode Colors */
-    --theme-background: #ffffff;
-    --theme-foreground: #171717;
-    --theme-surface: #f9fafb;
-    --theme-surface-elevated: #ffffff;
-    --theme-surface-inset: #f3f4f6;
-    --theme-border: #e5e7eb;
-    --theme-text-primary: #111827;
-    --theme-text-secondary: #6b7280;
-    --theme-text-metric: #2563eb;
-    --theme-accent: #171717;
-    --theme-accent-foreground: #ffffff;
+    /* Premium Editorial Dark Theme (Global Default) */
+    --theme-background: #030303;
+    --theme-foreground: #f5f5f5;
+    --theme-surface: #0a0a0a;
+    --theme-surface-elevated: #141414;
+    --theme-surface-inset: #000000;
+    --theme-border: #262626;
+    --theme-text-primary: #ffffff;
+    --theme-text-secondary: #888888;
+    --theme-text-metric: #a3a3a3;
+    --theme-accent: #ffffff;
+    --theme-accent-foreground: #000000;
     --theme-success: #16a34a;
     --theme-warning: #eab308;
     --theme-error: #dc2626;
     --theme-info: #3b82f6;
 
     /* Radius */
-    --theme-radius-sm: 0.125rem;
-    --theme-radius-md: 0.25rem;
-    --theme-radius-lg: 0.5rem;
+    --theme-radius-sm: 0rem;
+    --theme-radius-md: 0.125rem;
+    --theme-radius-lg: 0.25rem;
 
     /* Shadows */
-    --theme-elevation-low: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --theme-elevation-mid: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --theme-elevation-high: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --theme-elevation-low: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --theme-elevation-mid: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+    --theme-elevation-high: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
     
     /* Focus Ring Tokens */
     --ring-offset-width: 2px;
@@ -105,33 +107,42 @@
     --ring-color: var(--theme-accent);
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      /* Baseline Dark Mode Colors */
-      --theme-background: #0a0a0a;
-      --theme-foreground: #ededed;
-      --theme-surface: #171717;
-      --theme-surface-elevated: #262626;
-      --theme-surface-inset: #000000;
-      --theme-border: #404040;
-      --theme-text-primary: #f9fafb;
-      --theme-text-secondary: #a1a1aa;
-      --theme-text-metric: #60a5fa;
-      --theme-accent: #ededed;
-      --theme-accent-foreground: #0a0a0a;
-      
-      /* Dark mode shadow modifiers */
-      --theme-elevation-low: 0 1px 2px 0 rgb(0 0 0 / 0.5);
-      --theme-elevation-mid: 0 4px 6px -1px rgb(0 0 0 / 0.5);
-      --theme-elevation-high: 0 20px 25px -5px rgb(0 0 0 / 0.5);
-    }
+  html {
+    scroll-behavior: auto; /* Lenis handles smooth scroll — keep native off */
+    overflow-x: hidden;
   }
 
   body {
     background-color: var(--theme-background);
     color: var(--theme-foreground);
     font-family: var(--font-sans);
-    line-height: 1.5;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .bg-noise {
+    position: relative;
+  }
+  .bg-noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -146,6 +157,11 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+}
+
+@keyframes scrollPulse {
+  0%, 100% { transform: translateY(0); opacity: 0; }
+  50% { transform: translateY(100%); opacity: 1; }
 }
 
 @layer components {

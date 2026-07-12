@@ -11,7 +11,7 @@ import dynamic from 'next/dynamic';
 
 const HeroModel = dynamic(() => import('./HeroModel'), { 
   ssr: false, 
-  loading: () => <div className="absolute inset-0 z-0 opacity-0" />
+  loading: () => null
 });
 
 export function HeroSection({ heroSequence, title, subtitle }: { heroSequence?: any, title?: string, subtitle?: string }) {

@@ -24,7 +24,8 @@ export function Section({ children, className, spacing = 'md', as: Component = '
           'py-0': spacing === 'none',
           'py-[var(--spacing-section-sm)]': spacing === 'sm',
           'py-[var(--spacing-section-md)]': spacing === 'md',
-          'py-[var(--spacing-section-lg)]': spacing === 'lg' || spacing === 'xl',
+          'py-[var(--spacing-section-lg)]': spacing === 'lg',
+          'py-[var(--spacing-section-xl)]': spacing === 'xl',
         },
         className
       )}

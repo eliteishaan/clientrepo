@@ -34,7 +34,6 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
   const [cadMode, setCadModeState] = useState<CADMode>('Solid');
   const [theme, setThemeState] = useState<ThemeMode>('system');
   const [lastProjectSlug, setLastProjectSlugState] = useState<string | null>(null);
-  const [_mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
@@ -46,10 +45,9 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
         if (parsed.theme) setThemeState(parsed.theme);
         if (parsed.lastProjectSlug) setLastProjectSlugState(parsed.lastProjectSlug);
       }
-    } catch (e) {
-      console.warn('Failed to parse experience store', e);
+    } catch {
+      console.warn('Failed to parse experience store');
     }
-    setMounted(true);
   }, []);
 
   const saveState = (newState: Partial<ExperienceState>) => {
@@ -57,7 +55,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       const current = localStorage.getItem('engineering_experience');
       const parsed = current ? JSON.parse(current) : {};
       localStorage.setItem('engineering_experience', JSON.stringify({ ...parsed, ...newState }));
-    } catch (e) {}
+    } catch {}
   };
 
   const setIntroPlayed = (val: boolean) => {

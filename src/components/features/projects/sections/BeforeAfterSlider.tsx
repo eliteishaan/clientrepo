@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { clsx } from 'clsx';
 import { Text } from '@/components/ui/Text';
+import Image from 'next/image';
 
 interface BeforeAfterSliderProps {
   beforeImage: string;
@@ -64,14 +65,14 @@ export function BeforeAfterSlider({
       }}
     >
       {/* After Image (Background) */}
-      <img src={afterImage} alt={afterLabel} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+      <Image src={afterImage} alt={afterLabel} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover pointer-events-none" />
       
       {/* Before Image (Foreground, Clipped) */}
       <div 
         className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none"
         style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
       >
-        <img src={beforeImage} alt={beforeLabel} className="absolute inset-0 w-full h-full object-cover" />
+        <Image src={beforeImage} alt={beforeLabel} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
       </div>
 
       {/* Slider Handle */}

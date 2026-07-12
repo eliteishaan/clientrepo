@@ -21,6 +21,14 @@ const PDFPreviewRenderer = dynamic(() => import('./engines/PDFPreviewRenderer'),
   ssr: false, 
   loading: () => <EngineLoader type="PDF" /> 
 });
+const ImageRenderer = dynamic(() => import('./engines/ImageRenderer'), { 
+  ssr: false, 
+  loading: () => <EngineLoader type="IMG" /> 
+});
+const VideoRenderer = dynamic(() => import('./engines/VideoRenderer'), { 
+  ssr: false, 
+  loading: () => <EngineLoader type="VID" /> 
+});
 
 function EngineLoader({ type }: { type: string }) {
   return (
@@ -63,7 +71,7 @@ export function EngineeringViewer({ asset, viewerId }: { asset: AdaptedAsset, vi
       // Immediate dispose on unmount
       setLifecycle(viewerId, 'Disposed');
     };
-  }, [asset, viewerId]);
+  }, [asset, viewerId, detectCPUPerformanceTier, initViewer, setLifecycle]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -82,7 +90,7 @@ export function EngineeringViewer({ asset, viewerId }: { asset: AdaptedAsset, vi
 
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, [viewerId]);
+  }, [viewerId, setPauseState]);
 
   if (validationError) {
     return <div className="w-full aspect-video bg-surface flex items-center justify-center font-mono text-error border border-error">ERROR: {validationError}</div>;
@@ -103,7 +111,8 @@ export function EngineeringViewer({ asset, viewerId }: { asset: AdaptedAsset, vi
         {asset.type === 'GLB' && !instance.isPaused && <WebGLRenderer asset={asset} viewerId={viewerId} />}
         {asset.type === 'SVG' && <SVGRenderer asset={asset} viewerId={viewerId} />}
         {asset.type === 'PDF' && <PDFPreviewRenderer asset={asset} viewerId={viewerId} />}
-        {/* Images/Videos could just use native tags */}
+        {asset.type === 'Image' && <ImageRenderer asset={asset} viewerId={viewerId} />}
+        {asset.type === 'Video' && <VideoRenderer asset={asset} viewerId={viewerId} />}
       </div>
 
       <ViewerControls asset={asset} viewerId={viewerId} />

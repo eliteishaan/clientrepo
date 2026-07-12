@@ -22,12 +22,13 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
     gsap.fromTo(
       container.current,
-      { opacity: 0, y: 15 },
+      { opacity: 0, y: 10, filter: 'blur(4px)' },
       { 
         opacity: 1, 
         y: 0, 
-        duration: 0.3, 
-        ease: 'power2.out',
+        filter: 'blur(0px)',
+        duration: 0.6, 
+        ease: 'power3.out',
         clearProps: 'all' // Prevents transform conflicts after animation completes
       }
     );

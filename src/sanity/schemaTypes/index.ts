@@ -21,7 +21,7 @@ import { richText } from './objects/richText';
 import { seo } from './objects/seo';
 import { skill } from './objects/skill';
 import { heroSequence } from './objects/heroSequence';
-import { engineeringAsset } from './objects/engineeringAsset';
+
 
 export const schema = {
   types: [
@@ -46,6 +46,6 @@ export const schema = {
     seo,
     skill,
     heroSequence,
-    engineeringAsset,
+    
   ]
 };
