@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, Suspense } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { Container } from '@/components/ui/Container';
@@ -116,7 +116,9 @@ export function HeroSection({ title }: { title?: string }) {
           dpr={[1, 2]}
           className="w-full h-full"
         >
-          <HeroModel />
+          <Suspense fallback={null}>
+            <HeroModel />
+          </Suspense>
         </Canvas>
       </div>
 

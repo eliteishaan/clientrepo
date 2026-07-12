@@ -2,109 +2,77 @@
 
 import { useRef, useState, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Environment, Float, PresentationControls, Lightformer, ContactShadows, RoundedBox } from '@react-three/drei';
+import { Environment, Float, PresentationControls, Lightformer, ContactShadows, Center, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
-function TurbineStage({ isHovered }: { isHovered: boolean }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const blades = 22;
+function GearboxModel({ isHovered }: { isHovered: boolean }) {
+  const { scene } = useGLTF('/models/gearbox_assy.glb');
+  const modelRef = useRef<THREE.Group>(null);
 
-  // Pre-calculate geometry arrays to avoid recreation
-  const bladeIndices = useMemo(() => Array.from({ length: blades }), [blades]);
+  // Preload and convert materials to premium PBR Physical materials
+  useMemo(() => {
+    // Compute bounding box of the scene and scale it dynamically to a standard size
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const targetSize = 2.6; // Perfect bounds to avoid overlapping text
+    const scaleFactor = targetSize / maxDim;
+    scene.scale.setScalar(scaleFactor);
+
+    scene.traverse((child) => {
+      if ((child as any).isMesh) {
+        const mesh = child as THREE.Mesh;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        
+        if (mesh.material) {
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          
+          // Create highly detailed physical material matching CAD/precision manufacturing finishes
+          const physicalMat = new THREE.MeshPhysicalMaterial({
+            color: mat.color,
+            map: mat.map,
+            normalMap: mat.normalMap,
+            roughnessMap: mat.roughnessMap,
+            metalnessMap: mat.metalnessMap,
+            metalness: 0.95,
+            roughness: 0.22,
+            clearcoat: 0.8,
+            clearcoatRoughness: 0.1,
+            envMapIntensity: 2.2
+          });
+          mesh.material = physicalMat;
+        }
+      }
+    });
+  }, [scene]);
 
   useFrame((_state, delta) => {
-    if (!groupRef.current) return;
+    if (!modelRef.current) return;
     
     // Idle rotation
-    const baseSpeed = 0.3;
-    // Accelerate when hovered
-    const targetSpeed = isHovered ? 2.5 : baseSpeed;
+    const baseSpeed = 0.08;
+    // Speed up slightly when hovered
+    const targetSpeed = isHovered ? 0.35 : baseSpeed;
     
-    if (groupRef.current.userData.speed === undefined) {
-      groupRef.current.userData.speed = baseSpeed;
+    if (modelRef.current.userData.speed === undefined) {
+      modelRef.current.userData.speed = baseSpeed;
     }
     
-    groupRef.current.userData.speed = THREE.MathUtils.damp(
-      groupRef.current.userData.speed, 
+    modelRef.current.userData.speed = THREE.MathUtils.damp(
+      modelRef.current.userData.speed, 
       targetSpeed, 
-      3, // smoothness
+      2.5, 
       delta
     );
 
-    // Spin the turbine
-    groupRef.current.rotation.y += delta * groupRef.current.userData.speed;
+    modelRef.current.rotation.y += delta * modelRef.current.userData.speed;
   });
 
   return (
-    <group ref={groupRef} rotation={[Math.PI / 8, 0, 0]}>
-      {/* Outer Casing - Matte Anodized Aluminum */}
-      <mesh>
-        <cylinderGeometry args={[2.5, 2.5, 1.2, 64, 1, true]} />
-        <meshPhysicalMaterial 
-          color="#0f0f11" 
-          metalness={0.8} 
-          roughness={0.6} 
-          clearcoat={0.1}
-          side={THREE.DoubleSide} 
-        />
-      </mesh>
-      
-      {/* Outer Rim Lips - Polished Chamfers to catch light */}
-      <mesh position={[0, 0.6, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.5, 0.04, 32, 128]} />
-        <meshPhysicalMaterial color="#333" metalness={1.0} roughness={0.1} />
-      </mesh>
-      <mesh position={[0, -0.6, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.5, 0.04, 32, 128]} />
-        <meshPhysicalMaterial color="#333" metalness={1.0} roughness={0.1} />
-      </mesh>
-
-      {/* Stator Vanes (Static structure behind blades) */}
-      <group position={[0, -0.3, 0]}>
-        {bladeIndices.map((_, i) => {
-          const angle = (i / blades) * Math.PI * 2;
-          return (
-            <mesh key={`stator-${i}`} position={[Math.cos(angle) * 1.5, 0, Math.sin(angle) * 1.5]} rotation={[0, -angle, 0]}>
-              <boxGeometry args={[1.8, 0.1, 0.05]} />
-              <meshPhysicalMaterial color="#050505" metalness={0.9} roughness={0.7} />
-            </mesh>
-          );
-        })}
-      </group>
-      
-      {/* Central Hub - Polished Titanium */}
-      <mesh position={[0, 0.1, 0]}>
-        <cylinderGeometry args={[0.6, 0.7, 0.6, 64]} />
-        <meshPhysicalMaterial color="#1a1a1c" metalness={0.95} roughness={0.2} clearcoat={0.5} />
-      </mesh>
-      
-      {/* Nose cone (Spinner) - Highly polished */}
-      <mesh position={[0, 0.6, 0]}>
-        <coneGeometry args={[0.6, 0.9, 64]} />
-        <meshPhysicalMaterial color="#000000" metalness={1.0} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.05} />
-      </mesh>
-
-      {/* Turbine Blades - Machined Aluminum with rounded edges for specular highlights */}
-      <group position={[0, 0.2, 0]}>
-        {bladeIndices.map((_, i) => {
-          const angle = (i / blades) * Math.PI * 2;
-          return (
-            <group key={`blade-${i}`} rotation={[0, angle, 0]}>
-              <mesh position={[1.5, 0, 0]} rotation={[Math.PI / 6, 0, 0]}>
-                <RoundedBox args={[1.9, 0.04, 0.4]} radius={0.015} smoothness={4}>
-                  <meshPhysicalMaterial 
-                    color="#b0b0b5" 
-                    metalness={1.0} 
-                    roughness={0.25} 
-                    clearcoat={0.3}
-                    envMapIntensity={2.5}
-                  />
-                </RoundedBox>
-              </mesh>
-            </group>
-          );
-        })}
-      </group>
+    <group ref={modelRef}>
+      <primitive object={scene} />
     </group>
   );
 }
@@ -145,12 +113,12 @@ function StudioLighting() {
         target={[0, 0, 0]}
       />
       
-      <ambientLight intensity={0.1} />
-      {/* Directional light for actual shadows */}
+      <ambientLight intensity={0.15} />
+      {/* Directional light for shadows */}
       <directionalLight 
         castShadow 
         position={[5, 10, 5]} 
-        intensity={1.5} 
+        intensity={2} 
         shadow-mapSize={[2048, 2048]} 
         shadow-bias={-0.0001}
       />
@@ -171,8 +139,8 @@ export default function HeroModel() {
 
     if (!prefersReducedMotion) {
       // Subtle, heavy feeling mouse parallax
-      const targetX = (mouse.y * viewport.height) / 35;
-      const targetY = (mouse.x * viewport.width) / 35;
+      const targetX = (mouse.y * viewport.height) / 45;
+      const targetY = (mouse.x * viewport.width) / 45;
       
       assemblyRef.current.rotation.x = THREE.MathUtils.damp(assemblyRef.current.rotation.x, targetX, 2, delta);
       assemblyRef.current.rotation.y = THREE.MathUtils.damp(assemblyRef.current.rotation.y, targetY, 2, delta);
@@ -187,38 +155,44 @@ export default function HeroModel() {
         global={false}
         cursor={true}
         snap={true}
-        speed={1}
+        speed={1.2}
         zoom={1}
-        rotation={[0, 0, 0]}
+        rotation={[0.3, 0.5, 0]}
         polar={[-Math.PI / 6, Math.PI / 6]}
         azimuth={[-Math.PI / 4, Math.PI / 4]}
       >
         <Float 
-          speed={1.5} 
-          rotationIntensity={0.05} 
-          floatIntensity={0.15} 
-          floatingRange={[-0.05, 0.05]}
+          speed={1.2} 
+          rotationIntensity={0.03} 
+          floatIntensity={0.1} 
+          floatingRange={[-0.03, 0.03]}
         >
+          {/* Shift model to the right (x=0.7) to fully clear Vivan Nagrath text on the left */}
           <group 
             ref={assemblyRef}
+            position={[0.7, -0.15, 0]}
             onPointerOver={() => setIsHovered(true)}
             onPointerOut={() => setIsHovered(false)}
-            scale={0.9} // Slight scale down to ensure breathing room
           >
-            <TurbineStage isHovered={isHovered} />
+            <Center>
+              <GearboxModel isHovered={isHovered} />
+            </Center>
           </group>
         </Float>
       </PresentationControls>
 
       {/* Ground shadow for weight/physicality */}
       <ContactShadows 
-        position={[0, -2.2, 0]} 
-        opacity={0.6} 
-        scale={10} 
-        blur={2} 
+        position={[0.7, -2.0, 0]} 
+        opacity={0.45} 
+        scale={8} 
+        blur={2.5} 
         far={4} 
         color="#000000"
       />
     </>
   );
 }
+
+// Preload the gearbox model asset
+useGLTF.preload('/models/gearbox_assy.glb');
