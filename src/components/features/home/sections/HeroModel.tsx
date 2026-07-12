@@ -1,22 +1,25 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Environment, Float, PresentationControls } from '@react-three/drei';
+import { Environment, Float, PresentationControls, Lightformer, ContactShadows, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 
 function TurbineStage({ isHovered }: { isHovered: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
-  const blades = 24;
+  const blades = 22;
+
+  // Pre-calculate geometry arrays to avoid recreation
+  const bladeIndices = useMemo(() => Array.from({ length: blades }), [blades]);
 
   useFrame((_state, delta) => {
     if (!groupRef.current) return;
-    // Base idle rotation
-    const baseSpeed = 0.5;
-    // Accelerate when hovered
-    const targetSpeed = isHovered ? 4.0 : baseSpeed;
     
-    // We store the current speed on the userData object
+    // Idle rotation
+    const baseSpeed = 0.3;
+    // Accelerate when hovered
+    const targetSpeed = isHovered ? 2.5 : baseSpeed;
+    
     if (groupRef.current.userData.speed === undefined) {
       groupRef.current.userData.speed = baseSpeed;
     }
@@ -24,62 +27,133 @@ function TurbineStage({ isHovered }: { isHovered: boolean }) {
     groupRef.current.userData.speed = THREE.MathUtils.damp(
       groupRef.current.userData.speed, 
       targetSpeed, 
-      2, 
+      3, // smoothness
       delta
     );
 
+    // Spin the turbine
     groupRef.current.rotation.y += delta * groupRef.current.userData.speed;
   });
 
   return (
-    <group ref={groupRef} rotation={[0.4, 0, 0]}>
-      {/* Outer Casing */}
+    <group ref={groupRef} rotation={[Math.PI / 8, 0, 0]}>
+      {/* Outer Casing - Matte Anodized Aluminum */}
       <mesh>
-        <cylinderGeometry args={[2.4, 2.4, 0.8, 64, 1, true]} />
-        <meshPhysicalMaterial color="#1a1a1a" metalness={0.95} roughness={0.4} side={THREE.DoubleSide} clearcoat={0.2} />
+        <cylinderGeometry args={[2.5, 2.5, 1.2, 64, 1, true]} />
+        <meshPhysicalMaterial 
+          color="#0f0f11" 
+          metalness={0.8} 
+          roughness={0.6} 
+          clearcoat={0.1}
+          side={THREE.DoubleSide} 
+        />
       </mesh>
       
-      {/* Outer Rim Lip - Front */}
-      <mesh position={[0, 0.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.4, 0.05, 16, 64]} />
-        <meshPhysicalMaterial color="#2a2a2a" metalness={0.9} roughness={0.2} />
+      {/* Outer Rim Lips - Polished Chamfers to catch light */}
+      <mesh position={[0, 0.6, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[2.5, 0.04, 32, 128]} />
+        <meshPhysicalMaterial color="#333" metalness={1.0} roughness={0.1} />
       </mesh>
-      {/* Outer Rim Lip - Back */}
-      <mesh position={[0, -0.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[2.4, 0.05, 16, 64]} />
-        <meshPhysicalMaterial color="#2a2a2a" metalness={0.9} roughness={0.2} />
-      </mesh>
-      
-      {/* Central Hub */}
-      <mesh>
-        <cylinderGeometry args={[0.5, 0.6, 0.8, 32]} />
-        <meshPhysicalMaterial color="#111" metalness={0.9} roughness={0.3} />
-      </mesh>
-      
-      {/* Nose cone */}
-      <mesh position={[0, 0.6, 0]}>
-        <coneGeometry args={[0.5, 0.8, 32]} />
-        <meshPhysicalMaterial color="#0a0a0a" metalness={0.95} roughness={0.15} clearcoat={1.0} />
+      <mesh position={[0, -0.6, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[2.5, 0.04, 32, 128]} />
+        <meshPhysicalMaterial color="#333" metalness={1.0} roughness={0.1} />
       </mesh>
 
-      {/* Turbine Blades */}
-      {Array.from({ length: blades }).map((_, i) => {
-        const angle = (i / blades) * Math.PI * 2;
-        return (
-          <group key={i} rotation={[0, angle, 0]}>
-            <mesh position={[1.45, 0, 0]} rotation={[Math.PI / 4, 0, 0]}>
-              <boxGeometry args={[1.9, 0.03, 0.4]} />
-              <meshPhysicalMaterial 
-                color="#888" 
-                metalness={1.0} 
-                roughness={0.2} 
-                clearcoat={0.5} 
-                envMapIntensity={2.5}
-              />
+      {/* Stator Vanes (Static structure behind blades) */}
+      <group position={[0, -0.3, 0]}>
+        {bladeIndices.map((_, i) => {
+          const angle = (i / blades) * Math.PI * 2;
+          return (
+            <mesh key={`stator-${i}`} position={[Math.cos(angle) * 1.5, 0, Math.sin(angle) * 1.5]} rotation={[0, -angle, 0]}>
+              <boxGeometry args={[1.8, 0.1, 0.05]} />
+              <meshPhysicalMaterial color="#050505" metalness={0.9} roughness={0.7} />
             </mesh>
-          </group>
-        );
-      })}
+          );
+        })}
+      </group>
+      
+      {/* Central Hub - Polished Titanium */}
+      <mesh position={[0, 0.1, 0]}>
+        <cylinderGeometry args={[0.6, 0.7, 0.6, 64]} />
+        <meshPhysicalMaterial color="#1a1a1c" metalness={0.95} roughness={0.2} clearcoat={0.5} />
+      </mesh>
+      
+      {/* Nose cone (Spinner) - Highly polished */}
+      <mesh position={[0, 0.6, 0]}>
+        <coneGeometry args={[0.6, 0.9, 64]} />
+        <meshPhysicalMaterial color="#000000" metalness={1.0} roughness={0.1} clearcoat={1.0} clearcoatRoughness={0.05} />
+      </mesh>
+
+      {/* Turbine Blades - Machined Aluminum with rounded edges for specular highlights */}
+      <group position={[0, 0.2, 0]}>
+        {bladeIndices.map((_, i) => {
+          const angle = (i / blades) * Math.PI * 2;
+          return (
+            <group key={`blade-${i}`} rotation={[0, angle, 0]}>
+              <mesh position={[1.5, 0, 0]} rotation={[Math.PI / 6, 0, 0]}>
+                <RoundedBox args={[1.9, 0.04, 0.4]} radius={0.015} smoothness={4}>
+                  <meshPhysicalMaterial 
+                    color="#b0b0b5" 
+                    metalness={1.0} 
+                    roughness={0.25} 
+                    clearcoat={0.3}
+                    envMapIntensity={2.5}
+                  />
+                </RoundedBox>
+              </mesh>
+            </group>
+          );
+        })}
+      </group>
+    </group>
+  );
+}
+
+// Custom Lighting Environment (Apple/Porsche Studio Style)
+function StudioLighting() {
+  return (
+    <group>
+      {/* Base environmental reflections */}
+      <Environment preset="city" />
+      
+      {/* Large soft overhead light for clean top reflections */}
+      <Lightformer
+        form="rect"
+        intensity={4}
+        position={[0, 10, 0]}
+        scale={[20, 20, 1]}
+        rotation={[Math.PI / 2, 0, 0]}
+      />
+      
+      {/* Side fill light (warm) */}
+      <Lightformer
+        form="rect"
+        intensity={2}
+        color="#ffe8cc"
+        position={[-10, 0, 10]}
+        scale={[10, 20, 1]}
+        target={[0, 0, 0]}
+      />
+      
+      {/* Key rim light (cool, intense) to separate from background */}
+      <Lightformer
+        form="rect"
+        intensity={5}
+        color="#ccddff"
+        position={[10, 5, -10]}
+        scale={[10, 40, 1]}
+        target={[0, 0, 0]}
+      />
+      
+      <ambientLight intensity={0.1} />
+      {/* Directional light for actual shadows */}
+      <directionalLight 
+        castShadow 
+        position={[5, 10, 5]} 
+        intensity={1.5} 
+        shadow-mapSize={[2048, 2048]} 
+        shadow-bias={-0.0001}
+      />
     </group>
   );
 }
@@ -96,9 +170,9 @@ export default function HeroModel() {
       : false;
 
     if (!prefersReducedMotion) {
-      // Subtle mouse parallax for the entire assembly
-      const targetX = (mouse.y * viewport.height) / 25;
-      const targetY = (mouse.x * viewport.width) / 25;
+      // Subtle, heavy feeling mouse parallax
+      const targetX = (mouse.y * viewport.height) / 35;
+      const targetY = (mouse.x * viewport.width) / 35;
       
       assemblyRef.current.rotation.x = THREE.MathUtils.damp(assemblyRef.current.rotation.x, targetX, 2, delta);
       assemblyRef.current.rotation.y = THREE.MathUtils.damp(assemblyRef.current.rotation.y, targetY, 2, delta);
@@ -107,13 +181,7 @@ export default function HeroModel() {
 
   return (
     <>
-      <Environment preset="warehouse" />
-      
-      {/* Studio Lighting Setup for Metallic Surfaces */}
-      <ambientLight intensity={0.2} />
-      <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" castShadow />
-      <directionalLight position={[-10, 10, -5]} intensity={1} color="#aaccff" />
-      <spotLight position={[0, -10, 5]} intensity={5} color="#ffaa55" angle={0.6} penumbra={1} distance={20} />
+      <StudioLighting />
       
       <PresentationControls
         global={false}
@@ -122,24 +190,35 @@ export default function HeroModel() {
         speed={1}
         zoom={1}
         rotation={[0, 0, 0]}
-        polar={[-Math.PI / 4, Math.PI / 4]}
+        polar={[-Math.PI / 6, Math.PI / 6]}
         azimuth={[-Math.PI / 4, Math.PI / 4]}
       >
         <Float 
           speed={1.5} 
-          rotationIntensity={0.1} 
-          floatIntensity={0.2} 
+          rotationIntensity={0.05} 
+          floatIntensity={0.15} 
           floatingRange={[-0.05, 0.05]}
         >
           <group 
             ref={assemblyRef}
             onPointerOver={() => setIsHovered(true)}
             onPointerOut={() => setIsHovered(false)}
+            scale={0.9} // Slight scale down to ensure breathing room
           >
             <TurbineStage isHovered={isHovered} />
           </group>
         </Float>
       </PresentationControls>
+
+      {/* Ground shadow for weight/physicality */}
+      <ContactShadows 
+        position={[0, -2.2, 0]} 
+        opacity={0.6} 
+        scale={10} 
+        blur={2} 
+        far={4} 
+        color="#000000"
+      />
     </>
   );
 }
