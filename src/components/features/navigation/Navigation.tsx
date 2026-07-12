@@ -79,28 +79,25 @@ export function Navigation({ settings }: { settings: any }) {
       <header 
         ref={headerRef}
         className={clsx(
-          "fixed top-0 left-0 right-0 z-50 transition-colors duration-500 flex justify-center px-6 md:px-12 pt-6",
-          isScrolled ? "pointer-events-none" : ""
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex justify-center border-b",
+          isScrolled 
+            ? "bg-background/85 backdrop-blur-md border-white/5" 
+            : "bg-transparent border-transparent"
         )}
       >
-        <div className={clsx(
-          "w-full max-w-7xl rounded-full transition-all duration-500 flex items-center justify-between px-8 md:px-12 h-16 md:h-20 border",
-          isScrolled 
-            ? "bg-background/80 backdrop-blur-xl border-white/10 pointer-events-auto" 
-            : "bg-transparent border-transparent"
-        )}>
+        <div className="w-full max-w-[1440px] px-6 md:px-[56px] h-16 md:h-[88px] flex items-center justify-between pointer-events-auto">
           {/* Logo */}
           <Link 
             href="/" 
-            className="font-sans text-xl md:text-2xl font-bold tracking-tighter text-text-primary hover:text-accent transition-colors focus-ring outline-none select-none flex-shrink-0"
+            className="font-sans text-xl md:text-[36px] font-bold tracking-tighter text-text-primary hover:text-accent transition-colors focus-ring outline-none select-none flex-shrink-0"
             aria-label="Home"
           >
             VN
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-10" aria-label="Main Navigation">
-            <ul className="flex items-center gap-10 m-0 p-0 list-none">
+          <nav className="hidden md:flex items-center gap-[40px]" aria-label="Main Navigation">
+            <ul className="flex items-center gap-[40px] m-0 p-0 list-none">
               {navItems.map((nav: any) => {
                 const isActive = pathname === nav.href || pathname?.startsWith(`${nav.href}/`);
                 return (
@@ -108,8 +105,8 @@ export function Navigation({ settings }: { settings: any }) {
                     <Link 
                       href={nav.href} 
                       className={clsx(
-                        "group relative py-2 font-mono text-[11px] font-medium tracking-[0.1em] uppercase transition-all duration-300 focus-ring outline-none rounded-sm",
-                        isActive ? "text-text-primary" : "text-text-secondary hover:text-text-primary hover:tracking-[0.15em]"
+                        "group relative py-2 font-mono text-[13px] font-semibold tracking-[0.18em] uppercase transition-all duration-300 focus-ring outline-none rounded-sm",
+                        isActive ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
                       )}
                       aria-current={isActive ? 'page' : undefined}
                     >
