@@ -17,9 +17,9 @@ export function Container({ children, className, variant = 'standard' }: Props) 
       className={cn(
         'mx-auto w-full px-[var(--spacing-component-lg)] md:px-[var(--spacing-section-sm)]',
         {
-          'max-w-[var(--content-max-width)]': variant === 'standard',
-          'max-w-[var(--reading-max-width)]': variant === 'reading',
-          'max-w-[var(--project-max-width)]': variant === 'wide',
+          'max-w-[var(--width-container-standard)]': variant === 'standard',
+          'max-w-[var(--width-container-reading)]': variant === 'reading',
+          'max-w-[var(--width-container-wide)]': variant === 'wide',
           'max-w-none px-0': variant === 'full',
         },
         className

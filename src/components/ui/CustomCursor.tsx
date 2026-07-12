@@ -9,12 +9,16 @@ export function CustomCursor() {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (typeof window === 'undefined' || pathname?.startsWith('/studio')) {
+      if (cursorRef.current) cursorRef.current.style.display = 'none';
+      return;
+    }
+
     // Disable custom cursor on touch devices or reduced motion
     const isTouch = window.matchMedia('(pointer: coarse)').matches;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
-    // Also disable in Studio
-    if (isTouch || prefersReducedMotion || pathname?.startsWith('/studio') || typeof window === 'undefined') {
+    if (isTouch || prefersReducedMotion) {
       if (cursorRef.current) cursorRef.current.style.display = 'none';
       return;
     }
@@ -75,6 +79,7 @@ export function CustomCursor() {
       ref={cursorRef} 
       className="fixed top-0 left-0 w-4 h-4 bg-white mix-blend-difference rounded-full pointer-events-none z-[9999]"
       style={{ transform: 'translate(-50%, -50%)' }}
+      aria-hidden="true"
     />
   );
 }

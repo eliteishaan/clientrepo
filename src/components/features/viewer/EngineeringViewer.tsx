@@ -31,9 +31,29 @@ const VideoRenderer = dynamic(() => import('./engines/VideoRenderer'), {
 });
 
 function EngineLoader({ type }: { type: string }) {
+  const [dots, setDots] = useState('');
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(d => d.length >= 3 ? '' : d + '.');
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-surface-elevated z-10 font-mono text-caption text-text-secondary animate-pulse">
-      [ FETCHING_{type}_ENGINE ]
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-10 font-mono">
+      <div className="relative w-32 h-32 flex items-center justify-center mb-8">
+        <div className="absolute inset-0 border border-accent/20 rounded-full animate-[spin_4s_linear_infinite]" />
+        <div className="absolute inset-4 border-t border-r border-accent/40 rounded-full animate-[spin_2s_linear_infinite_reverse]" />
+        <div className="absolute inset-8 border border-dashed border-accent/30 rounded-full animate-[spin_6s_linear_infinite]" />
+        <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+      </div>
+      <div className="text-xs uppercase tracking-[0.3em] text-accent font-bold mb-2">
+        Allocating {type} Engine
+      </div>
+      <div className="text-[10px] uppercase tracking-widest text-white/40 font-mono">
+        Establishing VRAM Buffer{dots}
+      </div>
     </div>
   );
 }
@@ -80,12 +100,11 @@ export function EngineeringViewer({ asset, viewerId }: { asset: AdaptedAsset, vi
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // If strictly intersecting, unpause
           const isVisible = entry.isIntersecting;
           setPauseState(viewerId, !isVisible);
         });
       },
-      { threshold: 0.1 } // At least 10% visible
+      { threshold: 0.1 }
     );
 
     observer.observe(containerRef.current);
@@ -93,21 +112,47 @@ export function EngineeringViewer({ asset, viewerId }: { asset: AdaptedAsset, vi
   }, [viewerId, setPauseState]);
 
   if (validationError) {
-    return <div className="w-full aspect-video bg-surface flex items-center justify-center font-mono text-error border border-error">ERROR: {validationError}</div>;
+    return (
+      <div className="w-full aspect-[16/9] md:aspect-video bg-black flex flex-col items-center justify-center font-mono border border-error/50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-error/5 bg-[linear-gradient(rgba(255,0,0,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,0,0.1)_1px,transparent_1px)] bg-[size:20px_20px]" />
+        <span className="text-error font-bold uppercase tracking-[0.2em] mb-2 z-10">SYSTEM_ERR</span>
+        <span className="text-error/70 text-xs tracking-widest uppercase z-10">{validationError}</span>
+      </div>
+    );
   }
 
-  if (!instance) return <div className="w-full aspect-video bg-surface animate-pulse" />; // Stage 1: Placeholder
+  if (!instance) {
+    return (
+      <div className="w-full aspect-[16/9] md:aspect-video bg-black relative border border-white/10 flex items-center justify-center">
+        <span className="font-mono text-[10px] uppercase tracking-widest text-white/30 animate-pulse">
+          INITIALIZING...
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div 
       ref={containerRef}
-      className="relative w-full aspect-video bg-background border border-border overflow-hidden flex flex-col group"
+      className="relative w-full aspect-[4/3] md:aspect-video bg-black overflow-hidden flex flex-col group rounded-sm shadow-2xl"
       id={`viewer-${viewerId}`}
     >
+      {/* Structural Crosshairs & UI Framing */}
+      <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-accent/50 z-30 pointer-events-none transition-all duration-300 group-hover:w-12 group-hover:h-12" />
+      <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-accent/50 z-30 pointer-events-none transition-all duration-300 group-hover:w-12 group-hover:h-12" />
+      <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-accent/50 z-30 pointer-events-none transition-all duration-300 group-hover:w-12 group-hover:h-12" />
+      <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-accent/50 z-30 pointer-events-none transition-all duration-300 group-hover:w-12 group-hover:h-12" />
+      
+      {/* Center crosshair */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 z-10 pointer-events-none opacity-20 flex items-center justify-center">
+        <div className="w-full h-px bg-white/50" />
+        <div className="absolute w-px h-full bg-white/50" />
+      </div>
+
       <ViewerHUD asset={asset} instance={instance} />
       
       {/* Renderer Routing */}
-      <div className="relative flex-grow">
+      <div className="relative flex-grow w-full h-full cursor-grab active:cursor-grabbing">
         {asset.type === 'GLB' && !instance.isPaused && <WebGLRenderer asset={asset} viewerId={viewerId} />}
         {asset.type === 'SVG' && <SVGRenderer asset={asset} viewerId={viewerId} />}
         {asset.type === 'PDF' && <PDFPreviewRenderer asset={asset} viewerId={viewerId} />}

@@ -5,8 +5,7 @@ import {
   featuredProjectsQuery, 
   experienceQuery, 
   educationQuery, 
-  awardsQuery, 
-  publicationsQuery 
+  awardsQuery 
 } from '@/sanity/queries';
 
 import { HeroSection } from '@/components/features/home/sections/HeroSection';
@@ -16,7 +15,6 @@ import { SkillsSection } from '@/components/features/home/sections/SkillsSection
 import { ExperienceSection } from '@/components/features/home/sections/ExperienceSection';
 import { EducationSection } from '@/components/features/home/sections/EducationSection';
 import { AwardsSection } from '@/components/features/home/sections/AwardsSection';
-import { PublicationsSection } from '@/components/features/home/sections/PublicationsSection';
 import { ContactSection } from '@/components/features/home/sections/ContactSection';
 
 export const metadata = {
@@ -33,8 +31,7 @@ export default async function HomePage() {
     featuredProjects,
     experience,
     education,
-    awards,
-    publications
+    awards
   ] = await Promise.all([
     client.fetch(siteSettingsQuery, {}, fetchOptions),
     client.fetch(authorQuery, {}, fetchOptions),
@@ -42,36 +39,26 @@ export default async function HomePage() {
     client.fetch(experienceQuery, {}, fetchOptions),
     client.fetch(educationQuery, {}, fetchOptions),
     client.fetch(awardsQuery, {}, fetchOptions),
-    client.fetch(publicationsQuery, {}, fetchOptions),
   ]);
 
   return (
-    <main id="main-content" className="flex flex-col w-full bg-background">
-      {/* Skip to content for keyboard/screen reader users */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-foreground focus:text-background focus:font-mono focus:text-sm focus:uppercase focus:tracking-widest focus:rounded"
-      >
-        Skip to content
-      </a>
-
+    <div className="flex flex-col w-full bg-background">
       {/* 01 — Hero: Cinematic opening / WebGL presence */}
       <HeroSection 
         title={author?.name} 
-        subtitle={author?.role} 
       />
 
-      {/* 02 — Philosophy: Manifesto / Brand voice */}
-      <PhilosophySection bio={author?.bio} />
-
-      {/* 03 — Selected Works: Editorial stacked projects */}
+      {/* 02 — Selected Works: Editorial stacked projects */}
       <FeaturedProjectsSection projects={featuredProjects} />
 
-      {/* 04 — Capabilities: Typographic marquee skills */}
-      <SkillsSection skills={author?.skills} />
+      {/* 03 — Philosophy: Manifesto / Brand voice */}
+      <PhilosophySection bio={author?.bio} />
 
-      {/* 05 — Experience: Blueprint engineering timeline */}
+      {/* 04 — Experience: Blueprint engineering timeline */}
       <ExperienceSection experience={experience} />
+
+      {/* 05 — Capabilities: Typographic marquee skills */}
+      <SkillsSection skills={author?.skills} />
 
       {/* 06 — Education: Architectural grow-line layout */}
       <EducationSection education={education} />
@@ -79,11 +66,8 @@ export default async function HomePage() {
       {/* 07 — Recognition: Count-up awards list */}
       <AwardsSection awards={awards} />
 
-      {/* 08 — Publications: Print-editorial research list */}
-      <PublicationsSection publications={publications} />
-
-      {/* 09 — Contact & Footer: Full-chapter closing CTA */}
+      {/* 08 — Contact & Footer: Full-chapter closing CTA */}
       <ContactSection settings={settings} />
-    </main>
+    </div>
   );
 }

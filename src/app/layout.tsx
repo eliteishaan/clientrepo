@@ -15,9 +15,17 @@ const robotoMono = Roboto_Mono({
   variable: '--font-roboto-mono',
 });
 
+// Dynamic URL resolution for Vercel environments
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return `https://${process.env.NEXT_PUBLIC_SITE_URL}`;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+};
+
 // Global metadata architecture
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vivaan.dev'), // Update to actual domain in production
+  metadataBase: new URL(getBaseUrl()),
   title: {
     template: '%s | Vivaan | Engineering Portfolio',
     default: 'Vivaan | Premium Engineering Portfolio',

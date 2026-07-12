@@ -59,11 +59,13 @@ export function ViewerControls({ asset, viewerId }: { asset: AdaptedAsset, viewe
                 key={mode}
                 onClick={() => setMode(viewerId, mode)}
                 className={clsx(
-                  "px-4 py-2 text-xs font-mono tracking-widest uppercase transition-all duration-300 rounded-full",
+                  "px-4 py-2 text-xs font-mono tracking-widest uppercase transition-all duration-300 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
                   isActive 
                     ? "bg-white text-black shadow-sm" 
                     : "text-white/60 hover:text-white hover:bg-white/10"
                 )}
+                aria-pressed={isActive}
+                aria-label={`Set mode to ${mode}`}
               >
                 {mode}
               </button>
@@ -76,10 +78,11 @@ export function ViewerControls({ asset, viewerId }: { asset: AdaptedAsset, viewe
       <div className="flex items-center bg-black/60 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl">
         <button
           onClick={handleDownload}
-          className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           title="Download Original"
+          aria-label="Download Original Asset"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -88,15 +91,16 @@ export function ViewerControls({ asset, viewerId }: { asset: AdaptedAsset, viewe
         
         <button
           onClick={toggleFullscreen}
-          className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
         >
           {isFullscreen ? (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
             </svg>
           ) : (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>
           )}
