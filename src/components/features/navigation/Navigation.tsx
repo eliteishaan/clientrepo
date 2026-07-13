@@ -39,10 +39,28 @@ export function Navigation({ settings }: { settings: any }) {
   useGSAP(() => {
     if (!headerRef.current) return;
     
+    // Intro sequence
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReducedMotion && !(window as any).__navIntroPlayed) {
+      gsap.set(headerRef.current, { opacity: 0, y: -20 });
+      gsap.to(headerRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 1.8,
+        delay: 1.6, // Wait for the spaced-out hero sequence
+        ease: 'power4.out',
+        onComplete: () => {
+          (window as any).__navIntroPlayed = true;
+        }
+      });
+    }
+
+    // Scroll hide/show sequence
     gsap.to(headerRef.current, {
       y: isHidden ? '-100%' : '0%',
       duration: 0.4,
-      ease: 'power3.out'
+      ease: 'power3.out',
+      overwrite: 'auto'
     });
   }, [isHidden]);
 
@@ -69,8 +87,8 @@ export function Navigation({ settings }: { settings: any }) {
   }, [mobileMenuOpen]);
 
   const navItems = (settings?.navigation && settings.navigation.length > 0) ? settings.navigation : [
-    { label: 'Work', href: '/' },
-    { label: 'About', href: '/#overview' },
+    { label: 'Work', href: '/#work' },
+    { label: 'About', href: '/#about' },
     { label: 'Contact', href: '/#contact' }
   ];
 
@@ -79,9 +97,9 @@ export function Navigation({ settings }: { settings: any }) {
       <header 
         ref={headerRef}
         className={clsx(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300 flex justify-center border-b",
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-700 flex justify-center border-b group/nav opacity-80 hover:opacity-100",
           isScrolled 
-            ? "bg-background/85 backdrop-blur-md border-white/5" 
+            ? "bg-canvas/85 backdrop-blur-md border-white/5" 
             : "bg-transparent border-transparent"
         )}
       >
@@ -89,10 +107,11 @@ export function Navigation({ settings }: { settings: any }) {
           {/* Logo */}
           <Link 
             href="/" 
-            className="font-sans text-xl md:text-[36px] font-bold tracking-tighter text-text-primary hover:text-accent transition-colors focus-ring outline-none select-none flex-shrink-0"
+            className="group flex flex-col font-mono tracking-widest text-text-primary hover:text-accent transition-colors focus-ring outline-none select-none flex-shrink-0"
             aria-label="Home"
           >
-            VN
+            <span className="text-[12px] font-mono font-medium uppercase leading-none tracking-widest text-text-primary">VIVAN NAGRATH</span>
+            <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-text-secondary leading-none mt-1 group-hover:text-accent-foreground transition-colors duration-300">PORTFOLIO</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -105,7 +124,7 @@ export function Navigation({ settings }: { settings: any }) {
                     <Link 
                       href={nav.href} 
                       className={clsx(
-                        "group relative py-2 font-mono text-[13px] font-semibold tracking-[0.18em] uppercase transition-all duration-300 focus-ring outline-none rounded-sm",
+                        "group relative py-2 font-mono text-[0.85rem] font-medium tracking-[0.22em] uppercase transition-colors duration-300 focus-ring outline-none rounded-sm",
                         isActive ? "text-text-primary" : "text-text-secondary hover:text-text-primary"
                       )}
                       aria-current={isActive ? 'page' : undefined}
@@ -113,8 +132,8 @@ export function Navigation({ settings }: { settings: any }) {
                       {nav.label}
                       <span 
                         className={clsx(
-                          "absolute -bottom-1 left-0 right-0 h-px bg-text-primary origin-center transition-transform duration-500 ease-out",
-                          isActive ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100 group-hover:bg-accent"
+                          "absolute -bottom-1 left-0 right-0 h-[0.5px] origin-center transition-transform duration-500 ease-out",
+                          isActive ? "scale-x-100 opacity-100 bg-accent" : "scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100 bg-text-primary"
                         )} 
                       />
                     </Link>
@@ -127,10 +146,10 @@ export function Navigation({ settings }: { settings: any }) {
               <Link 
                 href={settings.resumeReference.url} 
                 isExternal 
-                className="group relative px-6 py-2.5 ml-4 font-mono text-[10px] tracking-widest uppercase text-background bg-text-primary overflow-hidden rounded-full focus-ring outline-none"
+                variant="button"
+                className="ml-4"
               >
-                <div className="absolute inset-0 bg-accent translate-y-[101%] transition-transform duration-500 ease-out group-hover:translate-y-0" />
-                <span className="relative z-10 mix-blend-difference text-white">Resume</span>
+                Resume
               </Link>
             )}
           </nav>
@@ -152,7 +171,7 @@ export function Navigation({ settings }: { settings: any }) {
       {/* Mobile Nav Overlay */}
       <div 
         ref={mobileMenuRef}
-        className="fixed inset-0 z-40 bg-background/95 backdrop-blur-2xl flex flex-col items-center justify-center pointer-events-none md:hidden"
+        className="fixed inset-0 z-40 bg-canvas/95 backdrop-blur-2xl flex flex-col items-center justify-center pointer-events-none md:hidden"
         style={{ clipPath: 'circle(0% at calc(100% - 2rem) 2rem)', pointerEvents: mobileMenuOpen ? 'auto' : 'none' }}
         inert={!mobileMenuOpen ? true : undefined}
         aria-hidden={!mobileMenuOpen}
@@ -179,7 +198,8 @@ export function Navigation({ settings }: { settings: any }) {
             <Link 
               href={settings.resumeReference.url} 
               isExternal 
-              className="mt-8 px-6 py-3 font-mono text-xs tracking-widest uppercase text-background bg-text-primary hover:bg-accent transition-colors rounded-sm focus-ring outline-none"
+              variant="button"
+              className="mt-8 w-full max-w-[240px]"
               onClick={() => setMobileMenuOpen(false)}
             >
               Download Resume

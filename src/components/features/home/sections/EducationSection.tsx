@@ -4,8 +4,9 @@ import { useRef } from 'react';
 import { Container } from '@/components/ui/Container';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { Education } from '@/lib/types/sanity';
 
-export function EducationSection({ education }: { education: any[] }) {
+export function EducationSection({ education }: { education: Education[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   
@@ -78,7 +79,7 @@ export function EducationSection({ education }: { education: any[] }) {
         if (node) {
           tl.fromTo(node,
             { scale: 0, rotation: -45, opacity: 0 },
-            { scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'back.out(2)' }
+            { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
           );
         }
 
@@ -99,22 +100,24 @@ export function EducationSection({ education }: { education: any[] }) {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="w-full bg-background text-foreground py-24 md:py-40 relative z-10 overflow-hidden" aria-label="Education">
+    <section ref={sectionRef} className="w-full bg-surface-elevated text-text-primary py-24 md:py-32 relative z-10 overflow-hidden" aria-label="Education">
       
-      {/* Architectural Hatch Background */}
-      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, var(--theme-border) 0, var(--theme-border) 1px, transparent 1px, transparent 20px)' }} />
+      {/* Background Texture */}
+      <div className="absolute inset-0 z-0 bg-engineering-grid pointer-events-none" />
 
-      <Container variant="wide" className="relative z-10">
+      <Container variant="editorial" className="relative z-10">
         
         {/* Header */}
-        <div className="mb-20 md:mb-32 flex flex-col md:flex-row justify-between md:items-end border-b border-border/50 pb-8 gap-4">
-          <h2 className="text-[clamp(2rem,5vw,5rem)] font-bold tracking-tighter uppercase leading-none">
+        <div className="mb-16 md:mb-24 flex flex-col md:flex-row justify-between md:items-end border-b border-border pb-8 gap-4">
+          <h2 className="text-display-l font-medium tracking-tight uppercase leading-none">
             Education
           </h2>
-          <div className="flex items-center gap-4">
-            <span className="w-2 h-2 bg-accent rounded-sm animate-pulse" />
-            <span className="font-mono text-[10px] md:text-xs text-text-secondary uppercase tracking-[0.3em]">
-              05 — 26 / Academic Foundation
+          <div className="flex flex-col md:items-end gap-1">
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-metadata">
+              DOC.REF / ACAD-01
+            </span>
+            <span className="font-mono text-mono-label text-text-secondary uppercase tracking-[0.2em]">
+              SEC.05 / ACADEMIC FOUNDATION / REV.A
             </span>
           </div>
         </div>
@@ -122,34 +125,50 @@ export function EducationSection({ education }: { education: any[] }) {
         <div className="relative pl-8 md:pl-16 ml-2 md:ml-4">
           
           {/* Static Background Line */}
-          <div className="absolute top-0 left-0 bottom-0 w-[1px] bg-border/30" />
+          <div className="absolute top-0 left-0 bottom-0 w-[1px] bg-border-subtle" />
           
-          {/* Architectural Grow Line */}
-          <div ref={lineRef} className="absolute top-0 left-0 bottom-0 w-[2px] bg-foreground origin-top scale-y-0" />
+          {/* Architectural Grow Line (Steel Blue Accent) */}
+          <div ref={lineRef} className="absolute top-0 left-0 bottom-0 w-[1px] bg-accent/60 origin-top scale-y-0" />
           
-          <div className="flex flex-col gap-24 md:gap-32">
-            {displayEducation.map((edu: any) => {
+          <div className="flex flex-col gap-16 md:gap-24">
+            {Object.values(displayEducation.reduce((acc: any, edu: any) => {
+              const startYear = edu.startDate ? new Date(edu.startDate).getFullYear() : '';
+              const endYear = edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present';
+              const key = `${edu.institution}-${startYear}-${endYear}`;
+              if (!acc[key]) {
+                acc[key] = { ...edu, degrees: [{ degree: edu.degree, major: edu.major, minor: edu.minor }] };
+              } else {
+                acc[key].degrees.push({ degree: edu.degree, major: edu.major, minor: edu.minor });
+                acc[key].isDualDegree = true;
+              }
+              return acc;
+            }, {})).map((edu: any) => {
               const startYear = edu.startDate ? new Date(edu.startDate).getFullYear() : '';
               const endYear = edu.endDate ? new Date(edu.endDate).getFullYear() : 'Present';
               
               return (
                 <div key={edu._id} className="education-item relative flex flex-col md:flex-row gap-8 md:gap-16 lg:gap-24 items-start">
                   
-                  {/* Architectural Node (Hollow Square) */}
-                  <div className="arch-node absolute left-[-36px] md:left-[-68px] top-2 w-4 h-4 bg-background border-[1.5px] border-foreground transform -translate-x-1/2 flex items-center justify-center">
-                    <div className="w-1 h-1 bg-accent rounded-sm" />
+                  {/* Machined Pin (Precision marker) */}
+                  <div className="arch-node absolute left-[-36px] md:left-[-68px] top-2 w-3 h-3 border-[1px] border-accent/40 bg-surface-elevated flex items-center justify-center rounded-sm transform -translate-x-1/2">
+                    <div className="w-1 h-1 bg-accent/80 rounded-sm" />
                   </div>
                   
                   {/* Date & Institution Meta */}
                   <div className="w-full md:w-1/3 flex flex-col gap-3 shrink-0 edu-anim mt-1">
-                    <span className="font-mono text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-text-secondary">
+                    <span className="font-mono text-mono-label font-medium uppercase tracking-widest text-text-secondary">
                       {startYear && `${startYear} — `}{endYear}
                     </span>
-                    <h4 className="text-xl md:text-2xl font-medium tracking-tight text-text-primary mt-2 uppercase">
+                    <h4 className="text-heading-m font-medium tracking-tight text-text-primary mt-2 uppercase">
                       {edu.institution}
                     </h4>
+                    {edu.isDualDegree && (
+                       <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-accent mt-1">
+                          [ DUAL DEGREE PROGRAM ]
+                       </span>
+                    )}
                     {edu.location && (
-                      <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-text-secondary/70">
+                      <span className="font-mono text-mono-micro uppercase tracking-widest text-text-secondary/70">
                         {edu.location}
                       </span>
                     )}
@@ -157,27 +176,30 @@ export function EducationSection({ education }: { education: any[] }) {
 
                   {/* Degree Details */}
                   <div className="w-full md:w-2/3 flex flex-col pt-1">
-                    <h3 className="edu-anim text-3xl md:text-5xl font-bold tracking-tight uppercase leading-none mb-6">
-                      {edu.degree} <span className="text-text-secondary/50 font-light mx-2">in</span> <span className="text-accent">{edu.major}</span>
-                    </h3>
-                    
-                    {edu.minor && (
-                      <p className="edu-anim text-lg md:text-xl text-text-secondary mb-8 font-medium">
-                        Minor in {edu.minor}
-                      </p>
-                    )}
+                    {edu.degrees.map((deg: any, i: number) => (
+                      <div key={i} className="mb-6 last:mb-0">
+                        <h3 className="edu-anim text-heading-l font-medium tracking-tight uppercase leading-none mb-2">
+                          {deg.degree} <span className="text-text-secondary/50 font-light mx-2">in</span> <span className="text-text-primary">{deg.major}</span>
+                        </h3>
+                        {deg.minor && (
+                          <p className="edu-anim text-body-l text-text-secondary font-medium mt-3">
+                            Minor in {deg.minor}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                     
                     {(edu.gpa || (edu.honors && edu.honors.length > 0)) && (
-                      <div className="flex flex-wrap gap-4 mt-4">
+                      <div className="flex flex-wrap gap-4 mt-6 border-t border-border-subtle pt-6">
                         {edu.gpa && (
-                          <div className="edu-anim border border-border/40 px-5 py-3 rounded bg-surface-inset shadow-inner">
-                            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-secondary block mb-1.5">Cum. GPA</span>
-                            <span className="font-mono text-sm md:text-base font-bold text-foreground">{edu.gpa}</span>
+                          <div className="edu-anim border border-border px-5 py-3 rounded-sm bg-transparent">
+                            <span className="font-mono text-mono-micro uppercase tracking-widest text-text-secondary block mb-1.5">Cum. GPA</span>
+                            <span className="font-mono text-body font-medium text-text-metric">{edu.gpa}</span>
                           </div>
                         )}
                         {edu.honors?.map((honor: string, i: number) => (
-                          <div key={i} className="edu-anim border border-border/40 px-5 py-3 rounded bg-surface/30 backdrop-blur-sm flex items-center hover:bg-surface-elevated transition-colors duration-300">
-                            <span className="font-mono text-[10px] md:text-xs font-bold uppercase tracking-widest text-text-primary">{honor}</span>
+                          <div key={i} className="edu-anim border border-border px-5 py-3 rounded-sm bg-surface/30 backdrop-blur-sm flex items-center hover:bg-surface-elevated transition-colors duration-300">
+                            <span className="font-mono text-mono-micro font-medium uppercase tracking-widest text-text-primary">{honor}</span>
                           </div>
                         ))}
                       </div>

@@ -1,6 +1,4 @@
 import { defineField, defineType } from 'sanity';
-
-
 import { FlaskConical } from 'lucide-react';
 
 export const research = defineType({
@@ -19,15 +17,15 @@ export const research = defineType({
       type: 'string',
       title: 'Title',
       group: 'general',
-      validation: Rule => Rule.required(),
+      validation: Rule => Rule.required().error('A research title is required.'),
     }),
     defineField({
       name: 'slug',
       type: 'slug',
       title: 'Slug',
       group: 'general',
-      options: { source: 'title' },
-      validation: Rule => Rule.required(),
+      options: { source: 'title', maxLength: 96, isUnique: (value, context) => context.defaultIsUnique(value, context) },
+      validation: Rule => Rule.required().error('A unique slug is required for routing.'),
     }),
     defineField({
       name: 'date',

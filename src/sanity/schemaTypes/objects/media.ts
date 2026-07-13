@@ -10,7 +10,7 @@ export const media = defineType({
       type: 'string',
       title: 'Media Type',
       options: { list: ['Image', 'Video', 'PDF', 'CAD', 'GLB'] },
-      validation: Rule => Rule.required(),
+      validation: Rule => Rule.required().error('Please select a media type.'),
     }),
     defineField({ name: 'image', type: 'image', title: 'Image', options: { hotspot: true }, hidden: ({ parent }) => parent?.type !== 'Image' }),
     defineField({ name: 'videoUrl', type: 'url', title: 'Video URL', hidden: ({ parent }) => parent?.type !== 'Video' }),

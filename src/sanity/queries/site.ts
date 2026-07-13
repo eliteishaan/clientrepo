@@ -6,8 +6,8 @@ export const siteSettingsQuery = groq`
     email,
     github,
     linkedin,
-    navigation,
-    footer,
+    "navigation": coalesce(navigation, []),
+    "footer": coalesce(footer, []),
     defaultSeo,
     resumeReference->{
       versionString,

@@ -7,6 +7,6 @@ export const seo = defineType({
   fields: [
     defineField({ name: 'metaTitle', type: 'string', title: 'Meta Title' }),
     defineField({ name: 'metaDescription', type: 'text', title: 'Meta Description', validation: Rule => Rule.max(160).warning('Longer descriptions may be truncated by search engines') }),
-    defineField({ name: 'openGraphImage', type: 'image', title: 'OpenGraph Image' }),
+    defineField({ name: 'openGraphImage', type: 'image', title: 'OpenGraph Image', options: { hotspot: true } }),
   ],
 });

@@ -40,7 +40,8 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
       const stored = localStorage.getItem('engineering_experience');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (typeof parsed.introPlayed === 'boolean') setIntroPlayedState(parsed.introPlayed);
+        // Do not persist introPlayed so the Hero animation plays on every page refresh
+        // if (typeof parsed.introPlayed === 'boolean') setIntroPlayedState(parsed.introPlayed);
         if (parsed.cadMode) setCadModeState(parsed.cadMode);
         if (parsed.theme) setThemeState(parsed.theme);
         if (parsed.lastProjectSlug) setLastProjectSlugState(parsed.lastProjectSlug);
@@ -60,7 +61,7 @@ export function ExperienceProvider({ children }: { children: React.ReactNode }) 
 
   const setIntroPlayed = (val: boolean) => {
     setIntroPlayedState(val);
-    saveState({ introPlayed: val });
+    // Deliberately not saving to localStorage so it replays on hard refresh
   };
 
   const setCadMode = (val: CADMode) => {

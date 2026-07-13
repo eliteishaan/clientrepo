@@ -8,17 +8,20 @@ export const authorQuery = groq`
     availability,
     bio,
     "imageUrl": image.asset->url,
-    metrics[]{
+    "metrics": coalesce(metrics[]{
       label,
       value,
       unit
-    },
+    }, []),
     primaryCta,
     secondaryCta,
-    skills[]{
-      proficiency,
-      category->{ title },
-      technology->{ name, "iconUrl": icon.asset->url }
-    }
+    "capabilities": coalesce(capabilities[]{
+      title,
+      "skills": coalesce(skills[]{
+        name,
+        featured,
+        "iconUrl": icon.asset->url
+      }, [])
+    }, [])
   }
 `;

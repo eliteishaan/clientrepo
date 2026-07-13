@@ -21,7 +21,7 @@ export const author = defineType({
       group: 'identity',
       description: 'Your full name as you want it displayed on the portfolio.',
       placeholder: 'e.g. Vivaan Sharma',
-      validation: Rule => Rule.required().min(2).max(80),
+      validation: Rule => Rule.required().min(2).max(80).error('Please enter the author name.'),
     }),
     defineField({
       name: 'role',
@@ -69,14 +69,15 @@ export const author = defineType({
       title: 'Key Metrics',
       group: 'content',
       description: 'Headline numbers shown in the hero section. Max 4 recommended. Example: "3 — Years of Experience".',
+      validation: Rule => Rule.max(4).warning('Adding more than 4 metrics may break the Hero layout.'),
     }),
     defineField({
-      name: 'skills',
+      name: 'capabilities',
       type: 'array',
-      of: [{ type: 'skill' }],
-      title: 'Listed Skills',
+      of: [{ type: 'expertiseCategory' }],
+      title: 'Technical Capabilities',
       group: 'content',
-      description: 'Technical skills displayed on the portfolio. Group by category for best results.',
+      description: 'Engineering tools, methodologies, and disciplines. Grouped by category.',
     }),
     defineField({
       name: 'primaryCta',

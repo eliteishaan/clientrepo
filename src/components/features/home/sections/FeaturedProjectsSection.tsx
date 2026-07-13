@@ -1,200 +1,280 @@
 'use client';
 
-import { useRef } from 'react';
-
-import { Container } from '@/components/ui/Container';
+import { useEffect, useRef } from 'react';
 import { Link } from '@/components/ui/Link';
-import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Image from 'next/image';
 
-export function FeaturedProjectsSection({ projects }: { projects: any[] }) {
-  const sectionRef = useRef<HTMLDivElement>(null);
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+}
+import { Project } from '@/lib/types/sanity';
+
+export function FeaturedProjectsSection({ projects }: { projects: Project[] }) {
+  const sectionRef = useRef<HTMLElement>(null);
   
-  useGSAP(() => {
-    if (!sectionRef.current) return;
-    const cards = gsap.utils.toArray<HTMLElement>('.project-card');
-
-    cards.forEach((card) => {
-      const imageWrapper = card.querySelector('.project-image-wrapper');
-      const image = card.querySelector('.project-image');
-      const content = card.querySelector('.project-content');
-
-      // Mask Reveal for the image wrapper
-      gsap.fromTo(imageWrapper, 
-        { clipPath: 'inset(100% 0% 0% 0%)' },
-        {
-          clipPath: 'inset(0% 0% 0% 0%)',
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 80%',
-            end: 'top 30%',
-            scrub: 1,
-          }
-        }
-      );
-
-      // Parallax for the image inside the wrapper
-      if (image) {
-        gsap.fromTo(image,
-          { yPercent: -15 },
-          {
-            yPercent: 15,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: imageWrapper,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: true,
-            }
-          }
-        );
-      }
-
-      // Fade up for content
-      gsap.fromTo(content,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 70%',
-            toggleActions: 'play none none reverse',
-          }
-        }
-      );
-    });
-  }, { scope: sectionRef });
-
   const displayProjects = (!projects || projects.length === 0) ? [
     {
       _id: 'fallback_1',
-      title: 'T6-6061 Enclosure',
+      title: 'T6-6061 Thermal Enclosure',
       slug: '#',
-      subtitle: 'Thermal management system for high-density computing.',
-      categories: [{ title: 'Industrial Design' }, { title: 'Thermal Engineering' }],
+      subtitle: 'Designed a thermal enclosure capable of sustaining high heat loads while maintaining manufacturable tolerances for aerospace integration.',
+      challenge: 'Maintain thermal stability during continuous high-load operation.',
+      outcome: 'Reduced operating temperature while preserving manufacturable tolerances.',
+      results: [
+        { label: 'Heat Reduction', value: '32%' },
+        { label: 'Tolerance', value: '±0.05 mm' },
+        { label: 'Weight', value: '-18%' },
+        { label: 'Material', value: '6061-T6' }
+      ],
+      categories: [{ title: 'Thermal Design' }, { title: 'FEA' }, { title: 'DFM' }, { title: 'CAD' }],
+      coverImageUrl: '/images/placeholders/rocket_injector_1783865429873.png',
       isFallback: true
     },
     {
       _id: 'fallback_2',
-      title: 'Kinetic Assembly',
+      title: 'Kinetic Micro-Assembly Effector',
       slug: '#',
-      subtitle: 'High-precision robotic effector for automated manufacturing.',
-      categories: [{ title: 'Robotics' }, { title: 'Mechatronics' }],
+      subtitle: 'Engineered a high-precision 5-axis robotic effector capable of automated micro-assembly tasks with absolute repeatability.',
+      challenge: 'Eliminate backlash and hysteresis in sub-millimeter positional control.',
+      outcome: 'Achieved zero-backlash positioning with absolute spatial accuracy.',
+      results: [
+        { label: 'Accuracy', value: '±2 μm' },
+        { label: 'Payload', value: '500g' },
+        { label: 'Actuation', value: 'Piezo' },
+        { label: 'Latency', value: '<5ms' }
+      ],
+      categories: [{ title: 'Robotics' }, { title: 'Kinematics' }, { title: 'Control Systems' }],
+      coverImageUrl: '/images/placeholders/robotic_effector_1783865454409.png',
       isFallback: true
     }
   ] : projects;
 
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      // Create the 3D depth effect: As a new card slides up, the one below it scales down and fades into the shadows
+      const cards = gsap.utils.toArray<HTMLElement>('.sticky-card');
+      
+      cards.forEach((card, i) => {
+        // Do not animate the very last card (the archive) so it stays solid at the end
+        if (i === cards.length - 1) return;
+
+        const innerContent = card.querySelector('.card-inner');
+        
+        gsap.to(innerContent, {
+          yPercent: -10, // Slight physical push back
+          scale: 0.92, // Compresses the titanium plate
+          opacity: 0.15, // Fades into the background
+          ease: 'none',
+          scrollTrigger: {
+            trigger: card,
+            start: "top top", // Starts the exact moment the card locks to the top
+            end: () => `+=${window.innerHeight}`, // Ends exactly when the next card fully covers it
+            scrub: true,
+            invalidateOnRefresh: true,
+          }
+        });
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [projects]);
+
   return (
-    <section ref={sectionRef} className="w-full bg-background text-foreground py-24 md:py-32 relative z-10" aria-label="Featured Projects">
-      <Container variant="wide">
-        <div className="mb-16 md:mb-32 flex justify-between items-end border-b border-border/50 pb-8">
-          <h2 className="text-[clamp(2rem,5vw,5rem)] font-bold tracking-tighter uppercase leading-none">
-            Selected Works
-          </h2>
-          <span className="font-mono text-sm text-text-secondary uppercase tracking-widest hidden md:block">
-            02 — 26
-          </span>
+    // FIX: Strictly NO overflow-hidden on this wrapper. Native scroll requires visible overflow.
+    <section 
+      id="work"
+      ref={sectionRef} 
+      className="w-full bg-surface-stone text-text-primary py-32 relative z-10" 
+      aria-label="Selected Works"
+    >
+      <div className="w-full flex flex-col relative z-10 bg-surface-stone">
+        
+        {/* Editorial Section Introduction */}
+        <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 pt-[12vh] pb-[6vh] flex flex-col items-start gap-4 relative">
+          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#7B8087] opacity-85">03</div>
+          <h2 className="font-serif text-[2.5rem] md:text-[3.5rem] font-medium leading-[1] text-[#0F1115]">Selected Work</h2>
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#4E5560]">Research · Engineering · Manufacturing</p>
+          {/* Fading Gradient Line */}
+          <div className="absolute bottom-0 left-6 md:left-12 right-6 md:right-12 h-[1px] bg-gradient-to-r from-[#0F1115]/40 via-[#0F1115]/10 to-transparent" />
         </div>
+        {displayProjects.map((project: Project, index: number) => {
+          const headingId = `project-heading-${project._id}`;
+          const projectSlug = project.slug;
+          const projectUrl = project.isFallback ? '#' : `/projects/${projectSlug}`;
 
-        <div className="flex flex-col gap-24 md:gap-40">
-          {displayProjects.map((project: any, index: number) => {
-            const headingId = `project-heading-${project._id}`;
-            const projectSlug = project.slug?.current || project.slug;
-            const projectUrl = project.isFallback ? '#' : `/projects/${projectSlug}`;
-            const projectYear = project.date ? new Date(project.date).getFullYear() : '2024';
-
-            return (
-              <article 
-                key={project._id} 
-                className="project-card group flex flex-col md:flex-row gap-8 md:gap-16 lg:gap-24 items-center outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xl"
-                aria-labelledby={headingId}
-              >
+          return (
+            // The magic happens here: sticky top-0 and h-screen perfectly stack the cards
+            <article 
+              key={project._id} 
+              className={`sticky-card sticky top-0 w-full h-screen flex items-start justify-center bg-surface-stone outline-none origin-top overflow-hidden ${
+                index === 0 ? 'border-t-0' : 'border-t border-border-light'
+              }`}
+              aria-labelledby={headingId}
+            >
+              {/* Inner wrapper that receives the GSAP scale/fade effect */}
+              <div className="card-inner w-full h-full max-w-[1600px] mx-auto px-6 md:px-12 py-16 md:py-0 flex flex-col md:flex-row items-start justify-between gap-8 md:gap-24">
                 
-                {/* Image Section */}
-                <div className={`w-full md:w-3/5 lg:w-2/3 ${index % 2 === 1 ? 'md:order-2' : ''}`}>
-                  <Link href={projectUrl} className="block w-full outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
-                    <div className="project-image-wrapper w-full aspect-[4/3] md:aspect-[16/10] overflow-hidden bg-surface-inset relative rounded-lg border border-border/30 shadow-elevation-low transition-shadow duration-500 group-hover:shadow-elevation-high">
+                {/* Text Hierarchy (Left on desktop, top on mobile) */}
+                <div className="w-full md:w-5/12 flex flex-col text-left order-1 my-auto max-h-[85vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  
+                  <div className="project-number font-mono text-[11px] uppercase tracking-[0.18em] text-[#7B8087] opacity-85 mb-4 md:mb-5">
+                    {String(index + 1).padStart(2, '0')} / {String(displayProjects.length).padStart(2, '0')}
+                  </div>
+                  
+                  <h3 id={headingId} className="project-title font-serif text-[2.5rem] md:text-[3.5rem] leading-[0.95] font-medium tracking-[-0.03em] mb-[48px] text-[#0F1115]">
+                    <Link href={projectUrl} className="outline-none block hover:opacity-90 transition-opacity">
+                      {project.title}
+                    </Link>
+                  </h3>
+                  
+                  {/* Mobile Image Hero (Only visible on mobile, positioned exactly between title and description) */}
+                  <div className="w-full h-[35vh] min-h-[300px] shrink-0 md:hidden mb-[48px]">
+                    <Link href={projectUrl} className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-[#2A2A2A]">
+                      <div className="w-full h-full overflow-hidden bg-surface-canvas relative border border-[#C6BFB3] shadow-none">
+                        {project.coverImageUrl ? (
+                          <Image 
+                            src={project.coverImageUrl} 
+                            alt={`Cover image for ${project.title}`} 
+                            fill
+                            sizes="(max-width: 768px) 100vw, 60vw"
+                            decoding="async"
+                            className="object-cover origin-center" 
+                          />
+                        ) : (
+                          <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-surface-canvas">
+                             <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                  </div>
+                  
+                  {/* Editorial Flow */}
+                  <div className="flex flex-col w-full border-t border-border-light">
+                    
+                    {/* Subtitle / Description */}
+                    {project.subtitle && (
+                      <div className="pt-[24px] pb-[36px] border-b border-border-light">
+                        <p className="text-[1.05rem] leading-[1.6] text-[#4E5560] font-sans text-balance max-w-[50ch]">
+                          {project.subtitle}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Challenge */}
+                    {project.challenge && (
+                      <div className="py-[24px] border-b border-border-light flex flex-col gap-[12px]">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7B8087] opacity-85">Challenge</span>
+                        <p className="text-[1rem] leading-[1.55] text-[#2A2A2A] max-w-[50ch]">
+                          {project.challenge}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Outcome */}
+                    {project.outcome && (
+                      <div className="py-[24px] border-b border-border-light flex flex-col gap-[12px]">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7B8087] opacity-85">Outcome</span>
+                        <p className="text-[1rem] leading-[1.55] text-[#2A2A2A] max-w-[50ch]">
+                          {project.outcome}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Results / Metrics */}
+                    {project.results && project.results.length > 0 && (
+                      <div className="pt-[20px] pb-[28px] border-b border-border-light">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4">
+                          {project.results.map((result: any, idx: number) => (
+                            <div key={idx} className="flex flex-col gap-[4px]">
+                              <span className="font-mono text-[15px] font-medium text-[#2A2A2A] leading-none">{result.value}</span>
+                              <span className="font-mono text-[11px] leading-[1.3] uppercase tracking-[0.18em] text-[#7B8087] opacity-85">{result.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Technologies */}
+                    {project.categories && project.categories.length > 0 && (
+                      <div className="pt-[24px] pb-[24px] border-b border-border-light flex flex-col gap-[12px]">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#7B8087] opacity-85">Engineering Stack</span>
+                        <div className="flex flex-wrap gap-x-3 gap-y-2 font-mono text-[11px] text-[#2A2A2A]">
+                          {project.categories.map((cat: any) => cat.title).join(' · ')}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Monochromatic CTA */}
+                  <div className="project-cta flex justify-start mt-[44px] mb-4">
+                    <Link 
+                      href={projectUrl} 
+                      className="group inline-flex items-center gap-[12px] font-mono text-[11px] uppercase tracking-[0.18em]"
+                    >
+                      <span className="relative pb-1 text-[#2A2A2A]">
+                        View Case Study
+                        <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-[#7B8794] transition-all duration-500 ease-out group-hover:w-full" />
+                      </span>
+                      <span className="transition-transform duration-500 ease-out group-hover:translate-x-1 text-[#2A2A2A]">→</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Cinematic Image Hero (Desktop only, right side) - Static & Printed */}
+                <div className="hidden md:block w-full md:w-7/12 md:h-[75vh] order-2 my-auto">
+                  <Link href={projectUrl} className="block w-full h-full outline-none focus-visible:ring-2 focus-visible:ring-[#2A2A2A]">
+                    <div className="w-full h-full overflow-hidden bg-surface-secondary relative border border-[#C6BFB3] shadow-none">
                       {project.coverImageUrl ? (
                         <Image 
                           src={project.coverImageUrl} 
                           alt={`Cover image for ${project.title}`} 
                           fill
-                          sizes="(max-width: 768px) 100vw, 66vw"
-                          className="project-image object-cover origin-center transition-transform duration-700 ease-out scale-110 group-hover:scale-105" 
+                          sizes="(max-width: 768px) 100vw, 60vw"
+                          decoding="async"
+                          className="object-cover origin-center" 
                         />
                       ) : (
-                        // Premium Placeholder Graphic
-                        <div className="project-image absolute inset-0 w-full h-full scale-110 transition-transform duration-700 ease-out group-hover:scale-105 flex items-center justify-center bg-gradient-to-br from-surface to-surface-elevated">
-                           <div className="absolute inset-0 bg-[linear-gradient(var(--theme-border)_1px,transparent_1px),linear-gradient(90deg,var(--theme-border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
-                           <span className="font-mono text-text-secondary tracking-widest uppercase relative z-10 bg-background/80 px-4 py-2 border border-border/50 rounded backdrop-blur-sm shadow-sm">Awaiting Media</span>
+                        <div className="absolute inset-0 w-full h-full flex items-center justify-center bg-surface-secondary">
+                           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
                         </div>
                       )}
-                      
-                      {/* Overlay for hover depth */}
-                      <div className="absolute inset-0 bg-black/0 transition-colors duration-500 group-hover:bg-black/10 pointer-events-none" />
                     </div>
                   </Link>
                 </div>
 
-                {/* Content Section */}
-                <div className="project-content w-full md:w-2/5 lg:w-1/3 flex flex-col justify-center">
-                  <div className="flex items-center gap-4 mb-4 md:mb-6">
-                    <span className="font-mono text-[10px] md:text-xs text-text-secondary uppercase tracking-[0.2em] block">
-                      {project.client || 'Internal Research'}
-                    </span>
-                    <div className="h-px bg-border/50 flex-grow" />
-                    <span className="font-mono text-[10px] md:text-xs text-text-secondary uppercase tracking-widest">
-                      {projectYear}
-                    </span>
-                  </div>
-                  
-                  <h3 id={headingId} className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 md:mb-6 transition-colors duration-300 group-hover:text-accent">
-                    <Link href={projectUrl} className="outline-none">
-                      {project.title}
-                    </Link>
-                  </h3>
-                  
-                  {project.subtitle && (
-                    <p className="text-text-secondary text-base md:text-lg mb-8 leading-relaxed max-w-sm">
-                      {project.subtitle}
-                    </p>
-                  )}
-                  
-                  {project.categories?.length > 0 && (
-                    <div className="flex flex-wrap gap-2 md:gap-3 mb-10">
-                      {project.categories.map((cat: any, i: number) => (
-                        <span key={cat._id || cat.slug || cat.title || i} className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-text-secondary border border-border/40 px-3 py-1.5 rounded-full bg-surface/30 backdrop-blur-sm transition-colors duration-300 group-hover:border-border/80">
-                          {cat.title}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+              </div>
+            </article>
+          );
+        })}
 
-                  <Link 
-                    href={projectUrl} 
-                    className="group/btn relative inline-flex items-center gap-4 text-xs md:text-sm font-bold uppercase tracking-[0.2em] self-start overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm text-accent"
-                    aria-label={`View case study for ${project.title}`}
-                  >
-                    <span className="relative z-10 transition-transform duration-300 group-hover/btn:-translate-y-[120%]">
-                      View Case Study
-                    </span>
-                    <span className="absolute inset-0 z-10 translate-y-[120%] transition-transform duration-300 group-hover/btn:translate-y-0 text-foreground">
-                      View Case Study
-                    </span>
-                    <div className="w-8 h-px bg-accent transition-all duration-300 group-hover/btn:w-16 group-hover/btn:bg-foreground" />
-                  </Link>
-                </div>
+        {/* Final Archive Panel - Also acts as the last sticky plate */}
+        <article className="sticky-card sticky top-0 w-full h-screen flex items-center justify-center bg-surface-stone border-t border-border-medium shadow-none">
+          <div className="card-inner w-full max-w-2xl flex flex-col gap-6 text-center px-6">
+            <h3 className="font-serif text-[3rem] md:text-[5rem] leading-[0.95] font-medium tracking-tight text-[#111111]">
+              Full Archive
+            </h3>
+            <p className="text-text-secondary text-body-l md:text-[1.25rem] font-sans mb-8 mx-auto max-w-[40ch]">
+              Review additional case studies, legacy projects, and detailed engineering documentation.
+            </p>
+            <div className="flex justify-center">
+              <Link href="#contact" className="group inline-flex items-center gap-3 font-mono text-[11px] md:text-[12px] uppercase tracking-[0.2em]">
+                <span className="relative pb-1 text-[#111111]">
+                  Initiate Transmission
+                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-[#111111] transition-all duration-500 ease-out group-hover:w-full" />
+                </span>
+                <span className="transition-transform duration-500 ease-out group-hover:translate-x-1 text-[#111111]">→</span>
+              </Link>
+            </div>
+          </div>
+        </article>
 
-              </article>
-            );
-          })}
-        </div>
-      </Container>
+      </div>
     </section>
   );
 }

@@ -3,149 +3,175 @@
 import { useRef, useMemo } from 'react';
 import { Container } from '@/components/ui/Container';
 import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
+import { gsap } from '@/lib/gsap';
 
-export function SkillsSection({ skills }: { skills: any[] }) {
+interface Skill {
+  name: string;
+  featured?: boolean;
+}
+
+interface CapabilityCategory {
+  title: string;
+  skills: Skill[];
+}
+
+export function SkillsSection({ capabilities }: { capabilities: CapabilityCategory[] }) {
   const sectionRef = useRef<HTMLElement>(null);
-  const marqueeRef = useRef<HTMLDivElement>(null);
   
   // Create placeholder data if CMS is empty
-  const displaySkills = useMemo(() => (!skills || skills.length === 0) ? [
-    { category: { title: 'Mechanical Systems' }, technology: { name: 'CAD' } },
-    { category: { title: 'Mechanical Systems' }, technology: { name: 'Mechanical Design' } },
-    { category: { title: 'Mechanical Systems' }, technology: { name: 'Manufacturing' } },
-    
-    { category: { title: 'Design & Analysis' }, technology: { name: 'Testing' } },
-    { category: { title: 'Design & Analysis' }, technology: { name: 'Analysis' } },
-    { category: { title: 'Design & Analysis' }, technology: { name: 'Simulation' } },
-    
-    { category: { title: 'Engineering Practice' }, technology: { name: 'Leadership' } },
-    { category: { title: 'Engineering Practice' }, technology: { name: 'Problem Solving' } },
-    { category: { title: 'Engineering Practice' }, technology: { name: 'Critical Thinking' } },
-  ] : skills, [skills]);
-
-  // Extract all unique technology names for the marquee
-  const marqueeItems = useMemo(() => {
-    const names = displaySkills.map(s => s.technology?.name).filter(Boolean);
-    return Array.from(new Set(names));
-  }, [displaySkills]);
-
-  // Group skills by category title
-  const groupedSkills = useMemo(() => {
-    return displaySkills.reduce((acc: any, skill: any) => {
-      const category = skill.category?.title || 'Core Capabilities';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(skill);
-      return acc;
-    }, {});
-  }, [displaySkills]);
+  const displayCapabilities = useMemo(() => (!capabilities || capabilities.length === 0) ? [
+    {
+      title: 'Mechanical Engineering',
+      skills: [{ name: 'CAD Design' }, { name: 'Thermal Systems' }, { name: 'GD&T' }, { name: 'Design for Manufacturing' }, { name: 'Finite Element Analysis' }]
+    },
+    {
+      title: 'Simulation & Analysis',
+      skills: [{ name: 'FEA' }, { name: 'ANSYS' }, { name: 'Failure Analysis' }, { name: 'Optimization' }]
+    },
+    {
+      title: 'Manufacturing',
+      skills: [{ name: 'CNC Machining' }, { name: 'Rapid Prototyping' }, { name: 'Assembly' }, { name: 'Tooling Design' }]
+    },
+    {
+      title: 'Leadership & Research',
+      skills: [{ name: 'Technical Writing' }, { name: 'Communication' }, { name: 'Leadership' }, { name: 'Research Protocols' }]
+    }
+  ] : capabilities, [capabilities]);
 
   useGSAP(() => {
     if (!sectionRef.current) return;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
 
-    // Infinite Marquee Animation
-    if (marqueeRef.current && !prefersReducedMotion) {
-      const marqueeInner = marqueeRef.current.querySelector('.marquee-inner');
-      if (marqueeInner) {
-        gsap.to(marqueeInner, {
-          xPercent: -50,
-          ease: "none",
-          duration: 20,
-          repeat: -1,
-        });
-      }
-    }
-
-    // Grid Fade Up Stagger
-    const columns = gsap.utils.toArray<HTMLElement>('.skill-col');
-    
-    gsap.fromTo(columns,
-      { opacity: 0, y: prefersReducedMotion ? 0 : 60 },
-      {
-        opacity: 1, 
-        y: 0,
-        duration: 1,
-        stagger: 0.15,
-        ease: 'power3.out',
+    gsap.context(() => {
+      // Intro Sequence Timeline
+      const introTl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top 75%',
+          start: 'top 85%',
           toggleActions: 'play none none reverse',
         }
-      }
-    );
+      });
+
+      introTl.fromTo('.section-meta',
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }
+        )
+        .fromTo('.section-title',
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 1, ease: 'power3.out' },
+          '-=0.8'
+        )
+        .fromTo('.section-desc',
+          { opacity: 0, y: 15 },
+          { opacity: 1, y: 0, duration: 1, ease: 'power3.out' },
+          '-=0.8'
+        )
+        .fromTo('.section-divider',
+          { scaleX: 0, transformOrigin: 'left', opacity: 0 },
+          { scaleX: 1, opacity: 0.5, duration: 1, ease: 'power3.out' },
+          '-=0.8'
+        );
+
+      // Independent trigger for each category block
+      // Desktop: they share Y coordinates so they trigger in rows
+      // Mobile: they stack and trigger sequentially as you scroll
+      const categories = gsap.utils.toArray<HTMLElement>('.capability-category');
+      
+      categories.forEach((cat) => {
+        const header = cat.querySelector('.category-header');
+        const items = gsap.utils.toArray(cat.querySelectorAll('.skill-item'));
+        
+        const catTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: cat,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse',
+          }
+        });
+
+        if (header) {
+          catTl.fromTo(header,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
+          );
+        }
+        
+        if (items.length > 0) {
+          catTl.fromTo(items,
+            { opacity: 0, y: 15 },
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: 'power3.out' },
+            header ? '-=0.6' : 0
+          );
+        }
+      });
+    }, sectionRef);
 
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="w-full bg-surface text-foreground py-24 md:py-40 relative z-10 border-y border-border overflow-hidden" aria-label="Technical Capabilities">
+    <section ref={sectionRef} className="w-full bg-surface-graphite text-text-primary-dark py-32 relative z-10" aria-label="Technical Expertise">
       
-      {/* Background Texture */}
-      <div className="absolute inset-0 z-0 bg-noise opacity-50 pointer-events-none" />
-
-      <Container variant="wide" className="relative z-10 mb-16 md:mb-32">
-        <div className="flex justify-between items-end border-b border-border/40 pb-8">
-          <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-accent flex items-center gap-4">
-            <span className="w-1.5 h-1.5 bg-accent rounded-full" />
-            Capabilities
+      <Container variant="editorial" className="relative z-10 mb-10 md:mb-14">
+        <div className="flex flex-col text-left max-w-[65ch]">
+          
+          {/* Metadata */}
+          <span className="section-meta font-mono text-[11px] md:text-[12px] font-medium uppercase tracking-[0.2em] text-text-secondary-dark leading-none">
+            Technical Expertise
           </span>
-          <span className="font-mono text-sm text-text-secondary uppercase tracking-widest hidden md:block">
-            04 — 26
-          </span>
+          
+          <div className="h-[24px]" />
+          
+          {/* Editorial Heading */}
+          <h2 className="section-title font-serif text-heading-l md:text-display-l font-medium tracking-tight leading-[1.1] text-text-primary-dark text-balance">
+            Engineering Toolkit
+          </h2>
+          
+          <div className="h-[16px]" />
+          
+          {/* Paragraph */}
+          <p className="section-desc font-sans text-body-l text-text-secondary-dark max-w-2xl text-balance leading-relaxed">
+            The tools, methodologies, and engineering disciplines supporting my work across research, design, and manufacturing.
+          </p>
+          
+          <div className="h-[40px]" />
+          
+          {/* Structural Divider */}
+          <div className="section-divider w-full max-w-[240px] h-[1px] bg-border-medium opacity-50 origin-left" />
+          
         </div>
       </Container>
 
-      {/* Massive Typographic Marquee */}
-      {marqueeItems.length > 0 && (
-        <div ref={marqueeRef} className="w-full overflow-hidden whitespace-nowrap border-y border-border/20 py-4 md:py-8 bg-surface-elevated/30 backdrop-blur-sm relative z-10 mb-20 md:mb-32 flex">
-          <div className="marquee-inner inline-flex items-center">
-            {/* Double the items to create a seamless loop */}
-            {[...marqueeItems, ...marqueeItems, ...marqueeItems, ...marqueeItems].map((item, i) => (
-              <div key={i} className="flex items-center">
-                <span className="text-[clamp(3rem,8vw,8rem)] font-bold tracking-tighter uppercase leading-none text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.15)] hover:text-foreground transition-colors duration-500 cursor-default px-8 md:px-16">
-                  {item}
-                </span>
-                <span className="w-4 h-4 md:w-8 md:h-8 bg-accent rounded-full opacity-50" />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Structured Technical Grid */}
-      <Container variant="wide" className="relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 md:gap-24">
-          {Object.entries(groupedSkills).map(([category, items]: [string, any]) => (
-            <div key={category} className="skill-col flex flex-col group/col">
-              
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight uppercase border-b border-border pb-6 mb-8 text-text-primary flex justify-between items-center group-hover/col:border-accent transition-colors duration-500">
-                {category}
-                <span className="font-mono text-[10px] text-text-secondary">[{items.length}]</span>
-              </h3>
-              
-              <ul className="flex flex-col">
-                {items.map((skill: any, idx: number) => {
-                  const isLast = idx === items.length - 1;
-                  return (
-                    <li key={idx} className={`group flex justify-between items-center py-4 ${!isLast ? 'border-b border-border/30' : ''}`}>
-                      <span className="text-lg md:text-xl font-medium tracking-tight text-text-secondary group-hover:text-accent transition-colors duration-300 relative pl-4">
-                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-accent rounded-full opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300" />
-                        {skill.technology?.name}
-                      </span>
-                      {skill.proficiency && (
-                        <div className="flex items-center gap-4">
-                          <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-widest text-text-secondary/60 group-hover:text-text-primary transition-colors duration-300">
-                            {skill.proficiency}
-                          </span>
-                        </div>
-                      )}
+      <Container variant="editorial" className="relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 md:gap-x-24 gap-y-16 md:gap-y-24 relative">
+          {displayCapabilities.map((category: CapabilityCategory, idx: number) => {
+            const rowClass = `skill-row-${Math.floor(idx / 2)}`;
+            return (
+              <div key={idx} className={`capability-category flex flex-col relative ${rowClass}`}>
+                
+                <h3 className="category-header font-sans text-[19px] md:text-[20px] font-medium text-text-primary-dark mb-8 tracking-tight leading-snug">
+                  {category.title}
+                </h3>
+                
+                <ul className="flex flex-col gap-4">
+                  {category.skills?.map((skill: Skill, sIdx: number) => (
+                    <li 
+                      key={sIdx} 
+                      className="skill-item flex items-center cursor-default"
+                      data-index={sIdx}
+                    >
+                      <div className="group relative inline-flex items-center transition-transform duration-500 ease-out hover:translate-x-[3px] py-[2px]">
+                        <span className={`font-sans text-[17px] tracking-wide transition-colors duration-500 ${skill.featured ? 'font-medium text-text-primary-dark' : 'text-text-secondary-dark group-hover:text-text-primary-dark'}`}>
+                          {skill.name}
+                        </span>
+                        <span className="absolute -bottom-[2px] left-0 right-0 h-[1px] bg-accent origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100" />
+                      </div>
                     </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       </Container>
     </section>

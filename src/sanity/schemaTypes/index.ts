@@ -21,6 +21,8 @@ import { richText } from './objects/richText';
 import { seo } from './objects/seo';
 import { skill } from './objects/skill';
 import { heroSequence } from './objects/heroSequence';
+import { expertiseCategory } from './objects/expertiseCategory';
+import { expertiseSkill } from './objects/expertiseSkill';
 
 
 export const schema = {
@@ -46,6 +48,7 @@ export const schema = {
     seo,
     skill,
     heroSequence,
-    
+    expertiseCategory,
+    expertiseSkill,
   ]
 };

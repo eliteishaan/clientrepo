@@ -120,11 +120,11 @@ const SVGRenderer = forwardRef<RendererEngine, { asset: AdaptedAsset, viewerId: 
         </div>
 
         <style dangerouslySetInnerHTML={{__html: `
-          .svg-engine-blueprint svg { stroke: var(--theme-text-primary); stroke-width: 1px; fill: none; transition: all 0.5s ease; }
+          .svg-engine-blueprint svg { stroke: var(--text-primary); stroke-width: 1px; fill: none; transition: all 0.5s ease; }
           .svg-engine-blueprint svg path { vector-effect: non-scaling-stroke; }
-          .svg-engine-layers svg { stroke: var(--theme-text-secondary); fill: none; }
-          .svg-engine-layers svg g[data-layer="dimensions"] { stroke: var(--theme-accent); opacity: 0.8; stroke-width: 2px; }
-          .svg-engine-layers svg g[data-layer="annotations"] { stroke: var(--theme-error); opacity: 0.9; }
+          .svg-engine-layers svg { stroke: var(--text-secondary); fill: none; }
+          .svg-engine-layers svg g[data-layer="dimensions"] { stroke: var(--accent); opacity: 0.8; stroke-width: 2px; }
+          .svg-engine-layers svg g[data-layer="annotations"] { stroke: var(--error); opacity: 0.9; }
         `}} />
       </div>
     );

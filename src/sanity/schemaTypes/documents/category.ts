@@ -1,6 +1,4 @@
 import { defineField, defineType } from 'sanity';
-
-
 import { Tag } from 'lucide-react';
 
 export const category = defineType({
@@ -14,15 +12,15 @@ export const category = defineType({
       type: 'string',
       title: 'Title',
       placeholder: 'e.g. Robotics',
-      validation: Rule => Rule.required(),
+      validation: Rule => Rule.required().error('A category title is required.'),
     }),
     defineField({
       name: 'slug',
-      type: 'slug',
       title: 'Slug',
+      type: 'slug',
       description: 'Used in URLs. Generate from title.',
-      options: { source: 'title' },
-      validation: Rule => Rule.required(),
+      options: { source: 'title', maxLength: 96, isUnique: (value, context) => context.defaultIsUnique(value, context) },
+      validation: Rule => Rule.required().error('A unique slug is required.'),
     }),
     defineField({
       name: 'description',

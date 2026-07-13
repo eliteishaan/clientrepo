@@ -15,6 +15,7 @@ export const siteSettings = defineType({
     defineField({ name: 'email', type: 'string', title: 'Contact Email', group: 'general' }),
     defineField({ name: 'github', type: 'url', title: 'GitHub URL', group: 'general' }),
     defineField({ name: 'linkedin', type: 'url', title: 'LinkedIn URL', group: 'general' }),
+    defineField({ name: 'acceptingCommissions', type: 'boolean', title: 'Accepting Commissions', group: 'general', description: 'Toggle the status badge in the footer.', initialValue: true }),
     defineField({ name: 'resumeReference', type: 'reference', to: [{ type: 'resume' }], title: 'Active Resume', group: 'general' }),
     
     defineField({ 

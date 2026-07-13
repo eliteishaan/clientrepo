@@ -83,19 +83,18 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="w-full bg-surface text-foreground py-24 md:py-40 relative z-10 border-b border-border overflow-hidden" aria-label="Research and Publications">
-      <Container variant="wide">
+    <section ref={sectionRef} className="w-full bg-surface-secondary text-text-primary py-24 md:py-32 relative z-10 border-b border-border-subtle overflow-hidden" aria-label="Research and Publications">
+      <Container variant="editorial">
         
         {/* Header - Editorial Index Style */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 md:mb-40 gap-8">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
-              <span className="w-1.5 h-1.5 bg-text-secondary rounded-full" />
-              <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-text-secondary">
+              <span className="font-mono text-mono-label uppercase tracking-widest text-text-secondary">
                 07 — 26 / Journal
               </span>
             </div>
-            <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-bold tracking-tighter uppercase leading-none">
+            <h2 className="text-display-l font-medium tracking-tight uppercase leading-none">
               Research &<br />Publications
             </h2>
           </div>
@@ -116,13 +115,13 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                 className="journal-row group relative flex flex-col pt-8 pb-12 md:pt-12 md:pb-16"
               >
                 {/* Expanding Top Border */}
-                <div className="journal-line absolute top-0 left-0 right-0 h-px bg-border group-hover:bg-accent group-hover:h-[2px] transition-all duration-500" />
+                <div className="journal-line absolute top-0 left-0 right-0 h-px bg-border-subtle group-hover:bg-accent group-hover:h-[2px] transition-all duration-500" />
                 
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] lg:grid-cols-[1fr_4fr] gap-8 md:gap-16">
                   
-                  {/* Left Column: Volume & Date */}
+                    {/* Left Column: Volume & Date */}
                   <div className="flex md:flex-col justify-between md:justify-start gap-4 md:gap-8 journal-meta">
-                    <span className="font-mono text-sm md:text-base font-bold text-accent tracking-widest uppercase">
+                    <span className="font-mono text-sm md:text-base font-medium text-text-primary tracking-widest uppercase">
                       VOL. {volume}
                     </span>
                     <span className="font-mono text-xs uppercase tracking-widest text-text-secondary group-hover:text-text-primary transition-colors duration-300">
@@ -133,27 +132,26 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                   {/* Right Column: Title & Metadata */}
                   <div className="flex flex-col items-start gap-6">
                     
-                    {/* Massive Serif Title */}
-                    <h3 className="journal-title text-3xl md:text-4xl lg:text-5xl font-serif italic tracking-tight leading-[1.1] text-foreground group-hover:text-accent transition-colors duration-500">
+                    <h3 className="journal-title text-heading-l font-medium tracking-tight leading-[1.1] text-text-primary group-hover:text-accent transition-colors duration-500">
                       {pub.title}
                     </h3>
                     
                     {/* Dense Metadata Grid */}
-                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border/30 journal-meta">
+                    <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border-subtle journal-meta">
                       <div className="flex flex-col gap-1">
-                        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-secondary/60">
+                        <span className="font-mono text-mono-micro uppercase tracking-widest text-text-secondary/60">
                           Published In
                         </span>
-                        <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest font-bold text-text-primary">
+                        <span className="font-mono text-mono-label uppercase tracking-widest font-medium text-text-primary">
                           {pub.publisher}
                         </span>
                       </div>
                       
                       <div className="flex flex-col gap-1">
-                        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-secondary/60">
+                        <span className="font-mono text-mono-micro uppercase tracking-widest text-text-secondary/60">
                           Authors
                         </span>
-                        <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-text-secondary">
+                        <span className="font-mono text-mono-label uppercase tracking-widest text-text-secondary">
                           {pub.authors?.join(', ')}
                         </span>
                       </div>
@@ -165,7 +163,7 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                         <Link 
                           href={pub.url} 
                           isExternal 
-                          className="group/btn relative inline-flex items-center gap-4 text-xs md:text-sm font-bold uppercase tracking-[0.2em] focus-visible:outline-none text-foreground"
+                          className="group/btn relative inline-flex items-center gap-4 text-mono-label font-medium uppercase tracking-widest focus-visible:outline-none text-text-primary"
                           aria-label={`Read publication: ${pub.title}`}
                         >
                           <span className="relative z-10 transition-transform duration-300 group-hover/btn:-translate-y-[120%]">
@@ -174,10 +172,10 @@ export function PublicationsSection({ publications }: { publications: any[] }) {
                           <span className="absolute inset-0 z-10 translate-y-[120%] transition-transform duration-300 group-hover/btn:translate-y-0 text-accent">
                             Read Paper
                           </span>
-                          <div className="w-8 h-[2px] bg-foreground transition-all duration-300 group-hover/btn:w-16 group-hover/btn:bg-accent" />
+                          <div className="w-8 h-[1px] bg-text-primary transition-all duration-300 group-hover/btn:w-16 group-hover/btn:bg-accent" />
                         </Link>
                       ) : (
-                        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-secondary/50 flex items-center gap-3">
+                        <span className="font-mono text-mono-micro uppercase tracking-widest text-text-secondary/50 flex items-center gap-3">
                           <span className="w-4 h-px bg-text-secondary/30" />
                           Print Archive
                         </span>

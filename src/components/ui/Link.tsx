@@ -20,18 +20,25 @@ export function Link({ className, children, isExternal, variant = 'inline', href
     <NextLink
       href={href}
       className={cn(
-        'focus-ring transition-colors cursor-pointer',
+        'focus-ring transition-colors duration-300 cursor-pointer',
         {
-          'text-[var(--color-text-primary)] hover:text-[var(--color-foreground)] underline underline-offset-4 decoration-[var(--color-border)] hover:decoration-[var(--color-foreground)]': variant === 'inline',
-          'text-[var(--color-text-secondary)] hover:text-[var(--color-foreground)] font-medium': variant === 'nav',
-          'inline-flex items-center justify-center font-medium bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sm)] px-[var(--spacing-component-md)] py-[var(--spacing-component-sm)] hover:border-[var(--color-foreground)]': variant === 'button',
+          'text-accent hover:text-accent-highlight underline underline-offset-4 decoration-accent/40 hover:decoration-accent': variant === 'inline',
+          'text-text-secondary hover:text-text-primary font-mono tracking-widest uppercase text-mono-label': variant === 'nav',
+          'group relative inline-flex items-center justify-center font-mono tracking-widest uppercase transition-all duration-300 ease-out focus-ring cursor-pointer disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98] bg-transparent border border-border-subtle text-text-primary rounded-none overflow-hidden hover:border-accent hover:text-accent-highlight px-6 py-2.5 text-mono-label': variant === 'button',
         },
         className
       )}
       {...externalProps}
       {...props}
     >
-      {children}
+      {variant === 'button' ? (
+        <>
+          <span className="relative z-10">{children}</span>
+          <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-accent scale-x-0 origin-center group-hover:scale-x-100 transition-transform duration-500 ease-out z-0" />
+        </>
+      ) : (
+        children
+      )}
     </NextLink>
   );
 }

@@ -1,179 +1,217 @@
 'use client';
 
-import { useRef, Suspense } from 'react';
+import { useRef, Suspense, useEffect, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from '@/lib/gsap';
 import { useExperience } from '@/hooks/useExperience';
 import { Canvas } from '@react-three/fiber';
 import dynamic from 'next/dynamic';
 
-const HeroModel = dynamic(() => import('./HeroModel'), { 
-  ssr: false, 
-  loading: () => null
+const HeroModel = dynamic(() => import('./HeroModel'), {
+  ssr: false,
+  loading: () => null,
 });
 
-// Helper for splitting text into chars
-const SplitText = ({ text, className }: { text: string; className?: string }) => {
-  return (
-    <span className={`inline-block ${className || ''}`} aria-label={text}>
-      {text.split(' ').map((word, wordIndex) => (
-        <span key={wordIndex} className="inline-block whitespace-nowrap mr-[0.25em]" aria-hidden="true">
-          {word.split('').map((char, charIndex) => (
-            <span key={charIndex} className="inline-block split-char opacity-0 translate-y-[120%] rotate-[10deg] origin-bottom-left">
-              {char}
-            </span>
-          ))}
-        </span>
-      ))}
-    </span>
-  );
-};
-
-export function HeroSection({ title }: { title?: string }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const webglContainerRef = useRef<HTMLDivElement>(null);
-  const metadataRef = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
+export function HeroSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [inView, setInView] = useState(true);
+  const metaRef = useRef<HTMLParagraphElement>(null);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
+  const subRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   const { introPlayed, setIntroPlayed } = useExperience();
 
-  useGSAP(() => {
-    if (!containerRef.current) return;
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      { rootMargin: '100px' }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIntroPlayed(true);
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
+
+      const reduced = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+
+      if (introPlayed || reduced) {
+        gsap.set(
+          [metaRef.current, subRef.current, ctaRef.current, canvasRef.current],
+          { opacity: 1, y: 0, x: 0 },
+        );
+        gsap.set([line1Ref.current, line2Ref.current], { yPercent: 0 });
+        (window as any).heroInteractionEnabled = true;
+        return;
       }
-    });
 
-    if (introPlayed || prefersReducedMotion) {
-      gsap.set('.split-char', { opacity: 1, y: 0, rotation: 0 });
-      gsap.set(metadataRef.current, { opacity: 1 });
-      gsap.set(subtitleRef.current, { opacity: 1 });
-      gsap.set(ctaRef.current, { opacity: 1 });
-      gsap.set(webglContainerRef.current, { opacity: 1 });
-      
-      gsap.to(webglContainerRef.current, {
-        y: '10%',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        }
+      // ── Initial hidden state ──
+      (window as any).heroInteractionEnabled = false;
+
+      gsap.set(metaRef.current, { opacity: 0, x: -30 });
+      gsap.set(line1Ref.current, { yPercent: 100 });
+      gsap.set(line2Ref.current, { yPercent: 100 });
+      gsap.set(subRef.current, { opacity: 0, x: 30 });
+      gsap.set(ctaRef.current, { opacity: 0, y: -20 });
+      gsap.set(canvasRef.current, { opacity: 0, x: 40 });
+
+      // ── Master timeline ──
+      const tl = gsap.timeline({
+        defaults: { ease: 'power4.out' },
+        onComplete: () => {
+          setIntroPlayed(true);
+          setTimeout(() => {
+            (window as any).heroInteractionEnabled = true;
+          }, 500);
+        },
       });
-      return;
-    }
 
-    // Cinematic Storytelling Sequence
-    gsap.set('.split-char', { opacity: 0, y: '120%', rotation: 10 });
-    gsap.set(metadataRef.current, { opacity: 0, y: 20 });
-    gsap.set(subtitleRef.current, { opacity: 0, y: 20 });
-    gsap.set(ctaRef.current, { opacity: 0, y: 20 });
-    gsap.set(webglContainerRef.current, { opacity: 0 });
+      // Nav intro trigger (since Nav checks this, we could manually trigger it or just let it run)
+      // Actually, Nav will run on its own. It's better to just wait a beat.
 
-    tl.to(metadataRef.current, { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 0.5);
-    tl.to('.split-char', { opacity: 1, y: 0, rotation: 0, duration: 1.2, stagger: 0.03, ease: 'power4.out' }, 0.8);
-    tl.to(webglContainerRef.current, { opacity: 1, duration: 2.5, ease: 'power2.inOut' }, 1.4);
-    tl.to(subtitleRef.current, { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 2.0);
-    tl.to(ctaRef.current, { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }, 2.5);
+      // Metadata (from West)
+      tl.to(metaRef.current, { opacity: 0.55, x: 0, duration: 2.0, ease: 'power3.out' }, 0.0);
 
-    // Scroll Parallax setup after animation
-    tl.add(() => {
-      gsap.to(webglContainerRef.current, {
-        y: '10%',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        }
-      });
-    });
+      // Object starts entering first (from East)
+      tl.to(canvasRef.current, { opacity: 1, x: 0, duration: 3.2, ease: 'power3.out' }, 0.2);
 
-  }, { scope: containerRef, dependencies: [introPlayed] });
+      // VIVAN reveal (from South via clip mask)
+      tl.to(line1Ref.current, { yPercent: 0, duration: 1.8 }, 0.8);
 
-  // Fallback split text if we need it
-  const titleParts = (title || 'Vivan Nagrath').split(' ');
+      // NAGRATH reveal (from South via clip mask)
+      tl.to(line2Ref.current, { yPercent: 0, duration: 1.8 }, 0.95);
+
+      // Statement (from East)
+      tl.to(subRef.current, { opacity: 1, x: 0, duration: 1.8, ease: 'power3.out' }, 1.3);
+
+      // CTA (from North)
+      tl.to(ctaRef.current, { opacity: 1, y: 0, duration: 1.5, ease: 'power3.out' }, 1.6);
+    },
+    { scope: sectionRef, dependencies: [introPlayed] },
+  );
 
   return (
-    <section 
-      ref={containerRef} 
-      className="relative w-full h-[100svh] min-h-[700px] overflow-hidden bg-background text-foreground flex flex-col pt-[88px]"
+    <section
+      ref={sectionRef}
+      className="hero-section relative w-full h-[100svh] min-h-[600px] overflow-hidden md:grid md:grid-cols-2"
     >
-      
-      {/* 3D WebGL Canvas - Parked strictly on the right, shifted 140px right, lowered 40px, w=58% */}
-      <div 
-        ref={webglContainerRef} 
-        className="absolute inset-y-0 right-[-10%] md:right-[-140px] w-[120%] md:w-[58%] top-[40px] z-0 opacity-0 pointer-events-auto flex items-center"
-      >
-        <Canvas 
-          camera={{ position: [0, 0, 7], fov: 35 }}
-          gl={{ antialias: true, alpha: true, powerPreference: "high-performance", toneMapping: 3 }}
-          dpr={[1, 2]}
-          className="w-full h-full"
-        >
-          <Suspense fallback={null}>
-            <HeroModel />
-          </Suspense>
-        </Canvas>
-      </div>
- 
-      {/* Container - matching Navigation 1440px max-width and 56px horizontal padding */}
-      <div className="relative z-10 flex-grow flex flex-col justify-center pb-20 pointer-events-none w-full max-w-[1440px] mx-auto px-6 md:px-[56px]">
-        {/* Left content column with 620-700px maximum width, target width 42-46% viewport (md:w-[44vw]) */}
-        <div className="w-full md:w-[44vw] max-w-[700px] relative z-10 flex flex-col items-start text-left">
-          
-          {/* Metadata Row */}
-          <div 
-            ref={metadataRef} 
-            className="flex flex-wrap items-center gap-[28px] font-mono text-[11px] text-text-secondary uppercase tracking-[0.24em] opacity-[0.55] mb-[56px]"
-          >
-            <span>Purdue University</span>
-            <span className="text-border/40 font-light select-none">/</span>
-            <span>Mechanical Engineering</span>
-            <span className="text-border/40 font-light select-none">/</span>
-            <span>Applied Physics</span>
-          </div>
-          
-          {/* Hero Title */}
-          <h1 className="font-sans font-[800] text-[clamp(2.5rem,7.8vw,3.8rem)] md:text-[clamp(3.8rem,7.8vw,7.8rem)] leading-[0.92] tracking-[-0.04em] uppercase overflow-hidden text-text-primary -ml-0.5 md:-ml-1 flex flex-col">
-            {titleParts.map((part, i) => (
-              <SplitText key={i} text={part} className="block" />
-            ))}
-          </h1>
-          
-          {/* Subtitle */}
-          <div 
-            ref={subtitleRef} 
-            className="font-mono text-[15px] sm:text-[16px] md:text-[18px] font-normal text-white/72 uppercase tracking-[0.04em] leading-[1.9] flex flex-col mt-[72px]"
-          >
-            <span>Mechanical Engineering</span>
-            <span>Applied Physics</span>
-            <div className="h-[1.9em]" /> {/* blank line matching leading-[1.9] */}
-            <span>Purdue University</span>
-            <span>West Lafayette</span>
-          </div>
+      {/* ─── LEFT: Typography (Canvas) ─── */}
+      <div className="relative z-20 h-full bg-surface-canvas py-32 flex flex-col justify-center px-6 md:px-[var(--spacing-section-sm)] lg:pl-[max(var(--spacing-section-sm),calc((100vw-var(--width-container-hero))/2))]">
+        <div className="w-full max-w-[var(--width-container-editorial)]">
 
-          {/* Call to Action */}
-          <div ref={ctaRef} className="mt-[64px] pointer-events-auto">
-            <button 
-              onClick={() => {
-                const el = document.getElementById('projects');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
+          {/* Metadata */}
+          <p
+            ref={metaRef}
+            className="font-mono uppercase select-none"
+            style={{
+              fontSize: '0.75rem', // 12px (bumped up for sharpness)
+              letterSpacing: '0.22em',
+              lineHeight: 1,
+              opacity: 0,
+              color: 'var(--text-secondary)',
+              willChange: 'transform, opacity',
+            }}
+          >
+            Purdue University &nbsp;•&nbsp; Mechanical Engineering &nbsp;•&nbsp; Applied Physics
+          </p>
+
+          <div style={{ height: 40 }} aria-hidden="true" />
+
+          {/* Title */}
+          <h1
+            className="font-serif uppercase"
+            style={{
+              fontSize: 'var(--font-size-display-xl)',
+              fontWeight: 380,
+              letterSpacing: '-0.01em',
+              lineHeight: 0.98,
+              maxWidth: 520,
+              color: 'var(--text-primary)',
+            }}
+          >
+            <div className="overflow-hidden py-1"><span ref={line1Ref} className="block" style={{ willChange: 'transform' }}>VIVAN</span></div>
+            <div className="overflow-hidden py-1"><span ref={line2Ref} className="block" style={{ willChange: 'transform' }}>NAGRATH</span></div>
+          </h1>
+
+          <div style={{ height: 32 }} aria-hidden="true" />
+          
+          {/* Differentiator Statement */}
+          <p
+            ref={subRef}
+            className="max-w-[420px]"
+            style={{ 
+              fontSize: '1.2rem', // bumped up slightly for sharpness
+              lineHeight: 1.6,
+              color: 'var(--text-secondary)', 
+              opacity: 0, 
+              willChange: 'transform, opacity' 
+            }}
+          >
+            Engineering high-performance physical systems from first principles.
+          </p>
+
+          <div style={{ height: 48 }} aria-hidden="true" />
+
+
+
+          <div className="mt-[6vh]" ref={ctaRef} style={{ opacity: 0, willChange: 'transform, opacity' }}>
+            <a
+              href="#work"
+              className="group inline-flex flex-col font-mono text-[12px] font-bold uppercase tracking-widest outline-none focus-ring"
+              style={{
+                color: 'var(--text-primary)',
+                textDecoration: 'none',
               }}
-              className="group font-mono text-[13px] font-medium uppercase tracking-[0.2em] text-text-primary/85 hover:text-text-primary hover:underline transition-colors focus-ring outline-none select-none"
             >
-              View Selected Work &rarr;
-            </button>
+              <span className="relative pb-1 flex items-center gap-2">
+                VIEW SELECTED WORK
+                <span className="inline-block transition-transform duration-300 group-hover:translate-x-[4px]">→</span>
+                <span className="absolute -bottom-1 left-0 right-0 h-[1px] bg-text-primary origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100" />
+              </span>
+            </a>
           </div>
         </div>
       </div>
-      
+
+      {/* ─── RIGHT: 3D Canvas (Graphite) ─── */}
+      <div className="relative z-10 h-full w-full pointer-events-none bg-surface-graphite">
+        
+        {/* Extremely Subtle Vignette */}
+        <div className="absolute inset-0 pointer-events-none mix-blend-multiply" style={{ background: 'radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.3) 100%)' }} />
+        <div
+          ref={canvasRef}
+          className="absolute inset-0 pointer-events-auto"
+          style={{ opacity: 0, willChange: 'transform, opacity' }}
+        >
+          <Canvas
+            frameloop={inView ? 'always' : 'demand'}
+            camera={{ position: [0, 0.6, 5.5], fov: 28 }}
+            gl={{
+              antialias: true,
+              alpha: true,
+              powerPreference: 'high-performance',
+              toneMapping: 6,
+              outputColorSpace: 'srgb',
+            }}
+            shadows
+            dpr={[1, 1.5]}
+            style={{ width: '100%', height: '100%' }}
+          >
+            <Suspense fallback={null}>
+              <HeroModel />
+            </Suspense>
+          </Canvas>
+        </div>
+      </div>
     </section>
   );
 }

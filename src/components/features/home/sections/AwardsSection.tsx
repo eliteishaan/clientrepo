@@ -5,8 +5,9 @@ import { Container } from '@/components/ui/Container';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { Link } from '@/components/ui/Link';
+import { Award } from '@/lib/types/sanity';
 
-export function AwardsSection({ awards }: { awards: any[] }) {
+export function AwardsSection({ awards }: { awards: Award[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
 
@@ -80,61 +81,55 @@ export function AwardsSection({ awards }: { awards: any[] }) {
   }, { scope: sectionRef });
 
   return (
-    <section ref={sectionRef} className="w-full bg-background text-foreground py-24 md:py-40 relative z-10 border-y border-border overflow-hidden" aria-label="Awards and Recognition">
-      <Container variant="wide" className="relative z-10">
+    <section ref={sectionRef} className="w-full bg-surface-primary text-text-primary py-24 md:py-32 relative z-10 border-y border-border-subtle overflow-hidden" aria-label="Awards and Recognition">
+      <Container variant="editorial" className="relative z-10">
         
         {/* Massive Typographic Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 md:mb-32 border-b border-border/50 pb-8 gap-12">
-          
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              <span className="w-2 h-2 border border-accent rounded-sm rotate-45 animate-pulse" />
-              <span className="font-mono text-[10px] md:text-xs uppercase tracking-[0.3em] text-text-secondary">
-                06 — 26 / Recognition
-              </span>
-            </div>
-            <h2 className="text-[clamp(2.5rem,6vw,6rem)] font-bold tracking-tighter uppercase leading-none">
-              Honors &<br />Awards
-            </h2>
+        <div className="mb-16 md:mb-24 flex flex-col md:flex-row justify-between md:items-end border-b border-border-subtle pb-8 gap-12 md:gap-4">
+          <h2 className="text-display-l font-medium tracking-tight uppercase leading-none">
+            Honors & Awards
+          </h2>
+          <div className="flex flex-col md:items-end gap-1">
+            <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-metadata">
+              DOC.REF / AWD-01
+            </span>
+            <span className="font-mono text-mono-label text-text-secondary uppercase tracking-[0.2em]">
+              SEC.06 / RECOGNITION / REV.A
+            </span>
           </div>
-          
-          {/* Visual Anchor Count */}
+
           <div className="flex items-baseline gap-4 md:gap-6 shrink-0 relative">
             <span 
               ref={counterRef} 
-              className="text-[clamp(6rem,12vw,12rem)] font-bold leading-[0.8] tracking-tighter text-transparent [-webkit-text-stroke:2px_rgba(var(--accent),0.3)] select-none"
+              className="text-display-xl font-medium leading-[0.8] tracking-tighter text-text-primary/5 select-none"
               aria-hidden="true"
             >
               00
             </span>
             <span className="sr-only">Total awards granted: {displayAwards.length}</span>
-            <span className="font-mono text-[10px] md:text-xs text-text-secondary uppercase tracking-[0.3em] rotate-180" style={{ writingMode: 'vertical-rl' }} aria-hidden="true">
+            <span className="font-mono text-mono-micro text-text-secondary uppercase tracking-widest rotate-180" style={{ writingMode: 'vertical-rl' }} aria-hidden="true">
               Total<br/>Granted
             </span>
           </div>
-          
         </div>
 
         {/* Editorial Table Layout */}
-        <div className="flex flex-col border-t border-border/50 group/table">
-          {displayAwards.map((award: any, i: number) => (
+        <div className="flex flex-col border-t border-border group/table">
+          {displayAwards.map((award: Award, i: number) => (
             <div
               key={award._id}
-              className="award-row group flex flex-col sm:flex-row justify-between sm:items-center py-8 md:py-12 border-b border-border/40 hover:border-accent transition-colors duration-500 relative cursor-pointer overflow-hidden bg-transparent hover:bg-surface-inset"
+              className="award-row group flex flex-col sm:flex-row justify-between sm:items-center py-8 md:py-12 border-b border-border hover:border-text-primary transition-colors duration-500 relative cursor-pointer overflow-hidden bg-transparent hover:bg-surface-elevated pl-0 hover:pl-4"
             >
               
-              {/* Hover highlight background slide */}
-              <div className="absolute inset-0 bg-accent/5 translate-y-[101%] group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-none" />
-
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-12 md:gap-24 lg:gap-32 relative z-10 w-full sm:w-auto">
                 
                 {/* Meta Column (Index & Year) */}
                 <div className="flex items-center gap-6 md:gap-12 shrink-0">
-                  <span className="font-mono text-[10px] md:text-xs text-text-secondary/50 font-bold w-4 md:w-6 transition-colors duration-300 group-hover:text-accent">
+                  <span className="font-mono text-mono-label text-text-secondary/50 font-bold w-4 md:w-6 transition-colors duration-300 group-hover:text-accent">
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   {award.date && (
-                    <span className="font-mono text-sm md:text-base font-medium text-text-secondary transition-colors duration-300 group-hover:text-foreground">
+                    <span className="font-mono text-mono-label font-medium text-text-secondary transition-colors duration-300 group-hover:text-foreground">
                       {new Date(award.date).getFullYear()}
                     </span>
                   )}
@@ -142,10 +137,10 @@ export function AwardsSection({ awards }: { awards: any[] }) {
 
                 {/* Main Content Column */}
                 <div className="flex flex-col gap-1.5 mt-4 sm:mt-0">
-                  <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight transition-transform duration-500 group-hover:translate-x-4">
+                  <h3 className="text-heading-m font-medium tracking-tight text-text-primary">
                     {award.title}
                   </h3>
-                  <p className="font-mono text-[10px] md:text-xs text-text-secondary uppercase tracking-[0.2em] transition-transform duration-500 group-hover:translate-x-4 delay-75">
+                  <p className="font-mono text-mono-label text-text-secondary uppercase tracking-widest transition-transform duration-500 group-hover:translate-x-4 delay-75">
                     {award.issuer}
                   </p>
                 </div>
@@ -158,14 +153,14 @@ export function AwardsSection({ awards }: { awards: any[] }) {
                   <Link
                     href={award.url}
                     isExternal
-                    className="group/link flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full border border-border/50 bg-background hover:border-accent transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent overflow-hidden"
+                    className="group/link flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-sm border border-border bg-background hover:border-text-primary transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-primary overflow-hidden"
                     aria-label={`View award: ${award.title}`}
                   >
                     <div className="relative flex items-center justify-center w-full h-full">
-                      <span className="absolute transform translate-x-[-150%] transition-transform duration-500 ease-out group-hover/link:translate-x-0 group-hover:text-accent">
+                      <span className="absolute transform translate-x-[-150%] transition-transform duration-500 ease-out group-hover/link:translate-x-0 group-hover:text-text-primary">
                         →
                       </span>
-                      <span className="absolute transform transition-transform duration-500 ease-out group-hover/link:translate-x-[150%] font-mono text-[10px] uppercase tracking-widest text-text-secondary">
+                      <span className="absolute transform transition-transform duration-500 ease-out group-hover/link:translate-x-[150%] font-mono text-mono-micro uppercase tracking-widest text-text-secondary">
                         View
                       </span>
                     </div>

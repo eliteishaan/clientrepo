@@ -11,8 +11,8 @@ export const project = defineType({
     { name: 'meta', title: 'SEO & Meta' },
   ],
   fields: [
-    defineField({ name: 'title', type: 'string', title: 'Title', group: 'general', validation: Rule => Rule.required().max(100) }),
-    defineField({ name: 'slug', type: 'slug', title: 'Slug', group: 'general', options: { source: 'title', maxLength: 96 }, validation: Rule => Rule.required() }),
+    defineField({ name: 'title', type: 'string', title: 'Title', group: 'general', validation: Rule => Rule.required().max(100).error('Please enter a project title.') }),
+    defineField({ name: 'slug', type: 'slug', title: 'Slug', group: 'general', options: { source: 'title', maxLength: 96 }, validation: Rule => Rule.required().error('A unique slug is required for routing.') }),
     defineField({ name: 'subtitle', type: 'string', title: 'Subtitle', group: 'general', description: 'One sentence overview' }),
     defineField({ name: 'client', type: 'string', title: 'Client / Class', group: 'general' }),
     defineField({ name: 'date', type: 'date', title: 'Project Date', group: 'general' }),
@@ -25,8 +25,16 @@ export const project = defineType({
     defineField({ name: 'categories', type: 'array', of: [{ type: 'reference', to: [{ type: 'category' }] }], title: 'Categories', group: 'general' }),
     defineField({ name: 'technologies', type: 'array', of: [{ type: 'reference', to: [{ type: 'technology' }] }], title: 'Technologies', group: 'general' }),
     
+    // Meta Data / Future Proofing
+    defineField({ name: 'location', type: 'string', title: 'Location', group: 'general' }),
+    defineField({ name: 'year', type: 'string', title: 'Year', group: 'general' }),
+    defineField({ name: 'team', type: 'string', title: 'Team / Organization', group: 'general' }),
+    defineField({ name: 'role', type: 'string', title: 'Specific Role', group: 'general' }),
+    
     // Engineering Content
     defineField({ name: 'overview', type: 'text', title: 'Overview', group: 'content', rows: 4 }),
+    defineField({ name: 'challenge', type: 'text', title: 'Challenge', group: 'content', rows: 2 }),
+    defineField({ name: 'outcome', type: 'text', title: 'Outcome', group: 'content', rows: 2 }),
     defineField({ name: 'problemStatement', type: 'text', title: 'Problem Statement', group: 'content', rows: 3 }),
     defineField({ name: 'objectives', type: 'array', of: [{ type: 'string' }], title: 'Objectives', group: 'content' }),
     defineField({ name: 'constraints', type: 'array', of: [{ type: 'constraint' }], title: 'Constraints', group: 'content' }),
@@ -43,7 +51,7 @@ export const project = defineType({
     defineField({ name: 'lessonsLearned', type: 'array', of: [{ type: 'string' }], title: 'Lessons Learned', group: 'content' }),
     
     // Media
-    defineField({ name: 'coverImage', type: 'image', title: 'Cover Image', group: 'media', options: { hotspot: true }, validation: Rule => Rule.required() }),
+    defineField({ name: 'coverImage', type: 'image', title: 'Cover Image', group: 'media', options: { hotspot: true }, validation: Rule => Rule.required().error('Please upload a project cover image. It is required for the layout.') }),
     defineField({ name: 'cad', type: 'array', of: [{ type: 'media' }], title: 'CAD Models & Drawings', group: 'media' }),
     defineField({ name: 'mediaGallery', type: 'array', of: [{ type: 'media' }], title: 'Media Gallery', group: 'media' }),
     defineField({ name: 'downloads', type: 'array', of: [{ type: 'download' }], title: 'Downloads', group: 'media' }),

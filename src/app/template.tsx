@@ -15,8 +15,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     
-    if (prefersReducedMotion) {
-      gsap.set(container.current, { opacity: 1, y: 0 });
+    if (prefersReducedMotion || pathname === '/') {
+      gsap.set(container.current, { opacity: 1, y: 0, filter: 'blur(0px)' });
       return;
     }
 

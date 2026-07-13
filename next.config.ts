@@ -1,5 +1,19 @@
 import type { NextConfig } from "next";
 
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.sanity.io;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https://cdn.sanity.io https://raw.githubusercontent.com https://dl.polyhaven.org;
+    font-src 'self' data:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'self';
+    connect-src 'self' https://*.api.sanity.io https://*.sanity.io wss://*.sanity.io https://raw.githubusercontent.com https://dl.polyhaven.org https://registry.npmjs.org;
+    frame-src 'self' https://vercel.com;
+`.replace(/\s{2,}/g, ' ').trim()
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -7,12 +21,16 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: [
           {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
+          {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
@@ -33,6 +51,11 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? {
+      exclude: ["error", "warn"],
+    } : false,
   },
   images: {
     formats: ['image/avif', 'image/webp'],

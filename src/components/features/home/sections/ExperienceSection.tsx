@@ -5,24 +5,28 @@ import { Container } from '@/components/ui/Container';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import Image from 'next/image';
+import { Link } from '@/components/ui/Link';
+import { Experience } from '@/lib/types/sanity';
 
-export function ExperienceSection({ experience }: { experience: any[] }) {
+export function ExperienceSection({ experience }: { experience: Experience[] }) {
   const sectionRef = useRef<HTMLElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     if (!sectionRef.current) return;
-    
-    // Timeline drawing animation
-    if (lineRef.current) {
-      gsap.fromTo(lineRef.current,
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    // Timeline draw line
+    if (trackRef.current) {
+      gsap.fromTo(trackRef.current,
         { scaleY: 0 },
         {
           scaleY: 1,
           ease: 'none',
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 50%',
+            start: 'top 60%',
             end: 'bottom 80%',
             scrub: true,
           }
@@ -30,16 +34,17 @@ export function ExperienceSection({ experience }: { experience: any[] }) {
       );
     }
 
-    const items = gsap.utils.toArray<HTMLElement>('.experience-item');
+    const items = gsap.utils.toArray<HTMLElement>('.experience-block');
 
     items.forEach((item) => {
       const node = item.querySelector('.timeline-node');
-      const contentBlocks = item.querySelectorAll('.exp-anim');
+      const content = item.querySelectorAll('.animate-up');
+      const image = item.querySelector('.animate-image');
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: item,
-          start: 'top 75%',
+          start: 'top 85%',
           toggleActions: 'play none none reverse',
         }
       });
@@ -47,22 +52,29 @@ export function ExperienceSection({ experience }: { experience: any[] }) {
       if (node) {
         tl.fromTo(node,
           { scale: 0, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(2)' }
+          { scale: 1, opacity: 1, duration: 0.8, ease: 'power3.out' }
         );
       }
 
-      tl.fromTo(contentBlocks,
-        { opacity: 0, y: 30, rotationX: 5, transformOrigin: '0% 50%' },
+      tl.fromTo(content,
+        { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
-          rotationX: 0,
           duration: 0.8,
           stagger: 0.1,
           ease: 'power3.out',
         },
-        "-=0.2"
+        "-=0.6"
       );
+
+      if (image) {
+        tl.fromTo(image,
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 1.2, ease: 'power3.out' },
+          "-=0.6"
+        );
+      }
     });
   }, { scope: sectionRef });
 
@@ -71,166 +83,153 @@ export function ExperienceSection({ experience }: { experience: any[] }) {
       _id: 'fallback_1',
       company: 'PURPL',
       role: 'Pulsejet Valve Design Responsible Engineer',
-      startDate: '2023',
+      startDate: '2023-01-01',
       isCurrent: true,
-      location: 'West Lafayette, IN',
-      achievements: [
-        'Leading the design and testing of high-frequency pulsejet valves.',
-        'Iterating on mechanical constraints to optimize thrust performance under extreme thermal conditions.'
-      ],
-      technologies: [{ name: 'CAD' }, { name: 'FEA' }, { name: 'Manufacturing' }]
+      location: 'West Lafayette, Indiana',
+      description: 'Designed and optimized pulsejet valve geometries for high-temperature propulsion systems, balancing thermal performance, manufacturability, and rapid design iteration across research and testing.',
+      technologies: [{ name: 'Thermal Design' }, { name: 'CAD' }, { name: 'FEA' }, { name: 'Manufacturing' }],
+      coverImageUrl: '/images/placeholders/rocket_injector_1783865429873.png'
     },
     {
       _id: 'fallback_2',
       company: 'Purdue Space Program',
       role: 'Injector Design Engineer',
-      startDate: '2022',
-      endDate: '2023',
+      startDate: '2022-01-01',
+      endDate: '2023-01-01',
       isCurrent: false,
-      location: 'West Lafayette, IN',
-      achievements: [
-        'Engineered complex injector geometries for aerospace applications.',
-        'Conducted fluid flow analysis and pressure drop testing.'
-      ],
-      technologies: [{ name: 'SolidWorks' }, { name: 'Fluid Dynamics' }, { name: 'Testing' }]
+      location: 'West Lafayette, Indiana',
+      description: 'Engineered complex multi-element injector architectures, achieving optimal propellant mixing and a significant increase in combustion stability during sustained ground testing.',
+      technologies: [{ name: 'Fluid Dynamics' }, { name: 'CAD' }, { name: 'Testing' }],
+      coverImageUrl: '/images/placeholders/fea_bracket_1783865466280.png'
     },
     {
       _id: 'fallback_3',
       company: 'ASME Racing Team',
       role: 'Performance Engineer',
-      startDate: '2021',
-      endDate: '2022',
+      startDate: '2021-01-01',
+      endDate: '2022-01-01',
       isCurrent: false,
-      location: 'West Lafayette, IN',
-      achievements: [
-        'Analyzed telemetry data to refine mechanical setups.',
-        'Optimized suspension geometry for improved track performance.'
-      ],
-      technologies: [{ name: 'Data Analysis' }, { name: 'Vehicle Dynamics' }, { name: 'Testing' }]
+      location: 'West Lafayette, Indiana',
+      description: 'Developed predictive telemetry models to refine mechanical suspension setups, translating raw track data into direct geometric optimizations that improved lap times significantly.',
+      technologies: [{ name: 'Data Analysis' }, { name: 'Kinematics' }, { name: 'Vehicle Dynamics' }],
+      coverImageUrl: '/images/placeholders/robotic_effector_1783865454409.png'
     },
     {
       _id: 'fallback_4',
       company: 'Sun Oil Limited',
       role: 'Engineering Internship',
-      startDate: '2020',
-      endDate: '2020',
+      startDate: '2020-01-01',
+      endDate: '2020-08-01',
       isCurrent: false,
       location: 'Bahamas',
-      achievements: [
-        'Assisted in industrial engineering operations and site management.',
-        'Documented safety compliance and operational workflows.'
-      ],
-      technologies: []
+      description: 'Audited industrial operational workflows and documented safety compliance protocols for large-scale energy infrastructure.',
+      technologies: [{ name: 'Systems Engineering' }, { name: 'Compliance' }],
+      coverImageUrl: null
     }
   ] : experience;
 
   return (
-    <section ref={sectionRef} className="w-full bg-background text-foreground py-24 md:py-40 relative z-10 overflow-hidden" aria-label="Experience">
-      {/* Cinematic Blueprint Grid */}
-      <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_20%,transparent_100%)] pointer-events-none" />
+    <section ref={sectionRef} className="w-full bg-surface-paper text-text-primary py-32 relative z-10 overflow-hidden" aria-label="Experience">
       
-      <Container variant="wide" className="relative z-10">
-        
-        {/* Header */}
-        <div className="mb-20 md:mb-32 flex flex-col md:flex-row justify-between md:items-end border-b border-border/50 pb-8 gap-4">
-          <h2 className="text-[clamp(2rem,5vw,5rem)] font-bold tracking-tighter uppercase leading-none">
-            Experience
-          </h2>
-          <div className="flex items-center gap-4">
-            <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-            <span className="font-mono text-[10px] md:text-xs text-text-secondary uppercase tracking-[0.3em]">
-              03 — 26 / Professional Timeline
-            </span>
-          </div>
-        </div>
+      {/* Header */}
+      <div className="w-full max-w-[1600px] mx-auto px-6 md:px-12 mb-24 md:mb-32 flex flex-col items-start gap-4 pb-8 relative">
+        <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#7B8087] opacity-85">04</div>
+        <h2 className="font-serif text-[2.5rem] md:text-[3.5rem] font-medium leading-[1] text-[#0F1115]">
+          Professional Experience
+        </h2>
+        {/* Fading Gradient Line */}
+        <div className="absolute bottom-0 left-6 md:left-12 right-6 md:right-12 h-[1px] bg-gradient-to-r from-[#0F1115]/40 via-[#0F1115]/10 to-transparent" />
+      </div>
+
+      <Container variant="editorial" className="relative z-10">
 
         {/* Timeline Structure */}
-        <div className="relative pl-6 md:pl-12 lg:pl-16 ml-2 md:ml-4">
+        <div className="relative pl-6 md:pl-12 lg:pl-16 w-full max-w-[900px] mx-auto">
           
-          {/* Static Track Line */}
-          <div className="absolute top-0 left-0 bottom-0 w-[1px] bg-border/40" />
+          {/* Static Background Track Line */}
+          <div className="absolute top-0 left-0 md:left-[16px] bottom-0 w-[1px] bg-[#D8D2C8]" />
           
           {/* Dynamic Draw Line */}
-          <div ref={lineRef} className="absolute top-0 left-0 bottom-0 w-[2px] bg-accent origin-top scale-y-0 shadow-[0_0_10px_rgba(var(--accent),0.5)]" />
-          
+          <div ref={trackRef} className="absolute top-0 left-0 md:left-[16px] bottom-0 w-[1px] bg-[#2A2A2A] origin-top scale-y-0" />
+
           <div className="flex flex-col gap-24 md:gap-32">
-            {displayExperience.map((exp: any, idx: number) => {
-              const isFeatured = idx === 0;
+            {displayExperience.map((exp: Experience) => {
               
+              // Format dates cleanly
+              const startYear = exp.startDate ? new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '';
+              const endYear = exp.isCurrent ? 'Present' : (exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '');
+              const duration = startYear ? `${startYear} — ${endYear}` : '';
+
               return (
-                <div key={exp._id} className="relative flex flex-col">
-                  {/* Categorical Dividers as requested by user */}
-                  {idx === 0 && (
-                    <div className="mb-12 font-mono text-xs uppercase tracking-[0.3em] text-accent border-b border-accent/20 pb-4">
-                      Featured Engineering Experience
+                <article key={exp._id} className="experience-block relative flex flex-col w-full">
+                  
+                  {/* Machined Timeline Node */}
+                  <div className="timeline-node absolute left-[-24px] md:left-[-32px] lg:left-[-48px] top-4 w-3 h-3 md:w-2.5 md:h-2.5 bg-[#0F1115] transform -translate-x-1/2 z-20" />
+
+                  {/* 1. Header (Company & Role) */}
+                  <div className="animate-up flex flex-col mb-8">
+                    <h3 className="font-serif text-[2.5rem] md:text-[3rem] font-medium leading-[1.1] text-[#0F1115] mb-2">
+                      {exp.company}
+                    </h3>
+                    <h4 className="font-mono text-[14px] md:text-[16px] text-[#2A2A2A]">
+                      {exp.role}
+                    </h4>
+                  </div>
+
+                  {/* 2. Metadata (Duration & Location) */}
+                  <div className="animate-up flex flex-col gap-1 font-mono text-[12px] md:text-[13px] text-[#7B8087] mb-12">
+                    <span>{duration}</span>
+                    <span>{exp.location}</span>
+                  </div>
+
+                  {/* 3. Description */}
+                  {exp.description && (
+                    <div className="animate-up mb-12">
+                      <p className="text-[1.05rem] md:text-[1.1rem] leading-[1.65] text-[#4E5560] max-w-[65ch]">
+                        {exp.description}
+                      </p>
                     </div>
                   )}
-                  {idx === 1 && (
-                    <div className="mb-12 font-mono text-xs uppercase tracking-[0.3em] text-text-secondary border-b border-border/20 pb-4">
-                      Other Engineering Experience
-                    </div>
-                  )}
 
-                  <div className="experience-item relative grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 perspective-[1000px]">
-                    
-                    {/* Glowing Node */}
-                    <div className={`timeline-node absolute left-[-24px] md:left-[-48px] lg:left-[-64px] ${isFeatured ? 'top-3 md:top-4 w-4 h-4 shadow-[0_0_20px_rgba(var(--accent),1)]' : 'top-2 md:top-3 w-3 h-3 shadow-[0_0_15px_rgba(var(--accent),0.8)]'} bg-background border-2 border-accent rounded-full transform -translate-x-1/2 z-20`} />
-                    
-                    {/* Meta Column (Date & Location) */}
-                    <div className="lg:col-span-3 flex flex-col gap-3 exp-anim">
-                      <span className="font-mono text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-accent">
-                        {exp.startDate} — {exp.isCurrent ? 'Present' : exp.endDate}
-                      </span>
-                      <span className="font-mono text-[10px] md:text-xs uppercase tracking-widest text-text-secondary">
-                        {exp.location}
-                      </span>
-                      {exp.companyLogoUrl && (
-                        <div className="mt-8 w-20 h-20 relative grayscale opacity-40 hover:grayscale-0 hover:opacity-100 transition-all duration-700 ease-out border border-border/30 rounded p-2 bg-surface-inset">
-                          <Image src={exp.companyLogoUrl} alt={exp.company} fill className="object-contain p-2" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content Column */}
-                    <div className={`lg:col-span-6 flex flex-col justify-start mt-[-6px] ${isFeatured ? 'scale-[1.02] transform-origin-left' : ''}`}>
-                      <h3 className={`${isFeatured ? 'text-4xl md:text-7xl text-accent' : 'text-3xl md:text-5xl'} font-bold tracking-tight mb-2 uppercase exp-anim transition-colors`}>
-                        {exp.company}
-                      </h3>
-                      <h4 className={`${isFeatured ? 'text-xl md:text-3xl text-text-primary' : 'text-lg md:text-2xl text-text-secondary'} font-medium mb-8 exp-anim`}>
-                        {exp.role}
-                      </h4>
-                      
-                      {exp.achievements?.length > 0 && (
-                        <ul className="flex flex-col gap-5">
-                          {exp.achievements.map((ach: string, aIdx: number) => (
-                            <li key={aIdx} className="exp-anim text-base md:text-lg text-text-primary leading-relaxed relative pl-6 before:content-[''] before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:bg-border before:rounded-sm hover:before:bg-accent hover:before:scale-150 before:transition-all before:duration-300">
-                              {ach}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                  {/* Tech Stack Column */}
-                  <div className="lg:col-span-3 mt-8 lg:mt-0">
-                    {exp.technologies?.length > 0 && (
-                      <div className="flex flex-col gap-6 exp-anim">
-                        <span className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-text-secondary border-b border-border/50 pb-3 inline-block w-full">
-                          Technical Stack
-                        </span>
-                        <div className="flex flex-wrap gap-2">
-                          {exp.technologies.map((tech: any) => (
-                            <span key={tech.name} className="font-mono text-[10px] md:text-xs border border-border/40 px-3 py-1.5 rounded-sm uppercase tracking-widest text-text-secondary bg-surface/30 backdrop-blur-sm hover:border-accent hover:text-accent hover:bg-accent/10 transition-colors duration-300">
-                              {tech.name}
-                            </span>
-                          ))}
-                        </div>
+                  {/* 4. Core Disciplines */}
+                  {exp.technologies && exp.technologies.length > 0 && (
+                    <div className="animate-up mb-16 flex flex-col gap-3">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#7B8087]">Core Disciplines</span>
+                      <div className="font-mono text-[12px] md:text-[13px] text-[#2A2A2A]">
+                        {exp.technologies.map((tech: any) => tech.name).join(' / ')}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  </div>
-                </div>
+                  {/* Optional CTA to Project */}
+                  {exp.relatedProjects && exp.relatedProjects.length > 0 && (
+                    <div className="animate-up mb-16">
+                      <Link 
+                        href={`/projects/${exp.relatedProjects[0].slug}`} 
+                        className="group inline-flex items-center gap-[12px] font-mono text-[11px] uppercase tracking-[0.18em]"
+                      >
+                        <span className="relative pb-1 text-[#2A2A2A]">
+                          View Project
+                          <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-[#7B8794] transition-all duration-500 ease-out group-hover:w-full" />
+                        </span>
+                        <span className="transition-transform duration-500 ease-out group-hover:translate-x-1 text-[#2A2A2A]">→</span>
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* 5. Large Cinematic Image */}
+                  {exp.coverImageUrl && (
+                    <div className="animate-image relative w-[85%] md:w-full aspect-[16/9] md:aspect-[3/2] overflow-hidden bg-surface-canvas border border-border-light">
+                      <Image 
+                        src={exp.coverImageUrl} 
+                        alt={`Visual from ${exp.company}`} 
+                        fill 
+                        sizes="(max-width: 1024px) 85vw, 820px"
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                </article>
               );
             })}
           </div>

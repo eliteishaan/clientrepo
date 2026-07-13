@@ -1,6 +1,5 @@
 import { defineField, defineType } from 'sanity';
 
-
 import { Briefcase } from 'lucide-react';
 
 export const experience = defineType({
@@ -10,30 +9,18 @@ export const experience = defineType({
   icon: Briefcase,
   fields: [
     defineField({
-      name: 'role',
-      type: 'string',
-      title: 'Role / Title',
-      placeholder: 'e.g. Hardware Engineering Intern',
-      validation: Rule => Rule.required(),
-    }),
-    defineField({
       name: 'company',
       type: 'string',
       title: 'Company / Organization',
-      placeholder: 'e.g. Apple',
+      placeholder: 'e.g. PURPL',
       validation: Rule => Rule.required(),
     }),
     defineField({
-      name: 'employmentType',
+      name: 'role',
       type: 'string',
-      title: 'Employment Type',
-      options: { list: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance'] },
-    }),
-    defineField({
-      name: 'location',
-      type: 'string',
-      title: 'Location',
-      placeholder: 'e.g. Cupertino, CA',
+      title: 'Role / Title',
+      placeholder: 'e.g. Pulsejet Valve Design Responsible Engineer',
+      validation: Rule => Rule.required(),
     }),
     defineField({
       name: 'startDate',
@@ -55,23 +42,30 @@ export const experience = defineType({
       initialValue: false,
     }),
     defineField({
-      name: 'description',
-      type: 'richText',
-      title: 'Description',
-      description: 'Overview of your responsibilities and team.',
+      name: 'location',
+      type: 'string',
+      title: 'Location',
+      placeholder: 'e.g. West Lafayette, Indiana',
     }),
     defineField({
-      name: 'achievements',
-      type: 'array',
-      of: [{ type: 'string' }],
-      title: 'Key Achievements',
-      description: 'Bullet points highlighting impact. Use numbers where possible.',
+      name: 'description',
+      type: 'text',
+      title: 'Description',
+      description: '3-5 line summary of what you actually did.',
+    }),
+    defineField({
+      name: 'coverImage',
+      type: 'image',
+      title: 'Large Image',
+      description: 'Large cinematic 16:9 contextual image (e.g. workshop, rocket, CAD).',
+      options: { hotspot: true },
     }),
     defineField({
       name: 'technologies',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'technology' }] }],
-      title: 'Technologies Used',
+      title: 'Core Disciplines',
+      description: 'e.g. CAD, FEA, Thermal Design, Manufacturing',
     }),
     defineField({
       name: 'relatedProjects',
@@ -82,8 +76,8 @@ export const experience = defineType({
   ],
   preview: {
     select: {
-      title: 'role',
-      subtitle: 'company',
+      title: 'company',
+      subtitle: 'role',
       isCurrent: 'isCurrent',
       startDate: 'startDate',
       endDate: 'endDate'
@@ -94,8 +88,8 @@ export const experience = defineType({
       const dateRange = startYear ? `${startYear} — ${endYear}` : '';
       
       return {
-        title: title || 'Untitled Role',
-        subtitle: `${subtitle || 'No company'} | ${dateRange}`,
+        title: title || 'Untitled Company',
+        subtitle: `${subtitle || 'No role'} | ${dateRange}`,
       };
     },
   },

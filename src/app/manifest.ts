@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Vivaan | Engineering Portfolio',
-    short_name: 'Vivaan',
+    name: 'Vivan | Engineering Portfolio',
+    short_name: 'Vivan',
     description: 'Mechanical Engineering & Applied Physics Portfolio',
     start_url: '/',
     display: 'standalone',

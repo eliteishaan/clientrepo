@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/studio/', '/internal/'],
     },
-    sitemap: 'https://vivaan.dev/sitemap.xml',
+    sitemap: 'https://vivan.dev/sitemap.xml',
   };
 }

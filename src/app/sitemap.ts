@@ -3,7 +3,7 @@ import { client } from '@/sanity/client';
 import { groq } from 'next-sanity';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const domain = 'https://vivaan.dev';
+  const domain = 'https://vivan.dev';
   
   // Fetch all project slugs
   const projects = await client.fetch<{ slug: string; _updatedAt: string }[]>(

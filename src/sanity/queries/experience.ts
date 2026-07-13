@@ -3,15 +3,15 @@ import { groq } from 'next-sanity';
 export const experienceQuery = groq`
   *[_type == "experience"] | order(startDate desc) {
     _id,
-    role,
     company,
-    employmentType,
-    location,
+    role,
     startDate,
     endDate,
     isCurrent,
+    location,
     description,
-    achievements,
-    technologies[]->{ name }
+    "coverImageUrl": coverImage.asset->url,
+    "technologies": coalesce(technologies[]->{ name }, []),
+    "relatedProjects": coalesce(relatedProjects[]->{ _id, title, "slug": slug.current }, [])
   }
 `;

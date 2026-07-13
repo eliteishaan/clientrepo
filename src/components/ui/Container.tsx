@@ -8,18 +8,19 @@ function cn(...inputs: ClassValue[]) {
 type Props = {
   children: React.ReactNode;
   className?: string;
-  variant?: 'standard' | 'reading' | 'wide' | 'full';
+  variant?: 'reading' | 'editorial' | 'media' | 'hero' | 'full' | 'wide' | 'standard'; // Keep wide and standard for backward compatibility temporarily
 };
 
-export function Container({ children, className, variant = 'standard' }: Props) {
+export function Container({ children, className, variant = 'editorial' }: Props) {
   return (
     <div
       className={cn(
         'mx-auto w-full px-[var(--spacing-component-lg)] md:px-[var(--spacing-section-sm)]',
         {
-          'max-w-[var(--width-container-standard)]': variant === 'standard',
           'max-w-[var(--width-container-reading)]': variant === 'reading',
-          'max-w-[var(--width-container-wide)]': variant === 'wide',
+          'max-w-[var(--width-container-editorial)]': variant === 'editorial' || variant === 'standard',
+          'max-w-[var(--width-container-media)]': variant === 'media',
+          'max-w-[var(--width-container-hero)]': variant === 'hero' || variant === 'wide',
           'max-w-none px-0': variant === 'full',
         },
         className

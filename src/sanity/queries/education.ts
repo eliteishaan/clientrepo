@@ -12,7 +12,7 @@ export const educationQuery = groq`
     startDate,
     endDate,
     gpa,
-    coursework,
-    honors
+    "coursework": coalesce(coursework, []),
+    "honors": coalesce(honors, [])
   }
 `;

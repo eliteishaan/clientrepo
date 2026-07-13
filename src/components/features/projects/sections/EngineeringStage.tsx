@@ -90,7 +90,7 @@ export function EngineeringStage({ label, stage }: { label: string; stage: any }
           <div className="w-full md:w-3/4">
             <div ref={ruleRef} className="w-full h-px bg-border/60 origin-left mb-8 md:mb-12 hidden md:block" />
             
-            {stage.content && (
+            {stage.content && Array.isArray(stage.content) && (
               <div className="prose-content max-w-prose">
                 <div className="prose prose-invert prose-lg md:prose-xl max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-p:text-text-secondary prose-p:leading-[1.7] prose-strong:text-foreground prose-a:text-accent prose-a:underline-offset-4">
                   <PortableText value={stage.content} />
